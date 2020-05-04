@@ -1,0 +1,4 @@
+iMessageManager/venv/
+iMessageManager/.idea/
+__pycache__/
+iMessageManager/data/messages.db
