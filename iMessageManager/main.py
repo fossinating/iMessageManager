@@ -19,7 +19,7 @@ while True:
     print("\nSelect a module to run by entering the number next to the name:\n")
     i = 1
     for module in modules:
-        print(str(i) + " | " + module.name)
+        print(str(i) + " | " + module.module_name)
 
     finished = False
     selected_module_index = 0
@@ -28,9 +28,13 @@ while True:
         _input = input()
         try:
             selected_module_index = int(_input)
-        except TypeError:
+            selected_module = modules[selected_module_index - 1]
+        except ValueError:
             finished = False
             print("Please input a valid index")
+        except IndexError:
+            finished = False
+            print("Please input a valid index within the range")
 
     selected_module = modules[selected_module_index - 1]
 
