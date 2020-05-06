@@ -1,6 +1,6 @@
 import os
 import importlib
-import messages
+import logger
 
 # Loads all modules
 
@@ -9,7 +9,7 @@ modules = []
 for module_file in modules_folder:
     if ".py" not in module_file:
         continue
-    print("modules." + module_file)
+    logger.debug("modules." + module_file)
     module = importlib.import_module("modules." + module_file.replace(".py", ""))
     modules.append(module)
 

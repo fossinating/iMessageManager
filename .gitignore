@@ -1,5 +1,5 @@
 iMessageManager/venv/
 iMessageManager/.idea/
+iMessageManager/logs/
 __pycache__/
-iMessageManager/data/messages.db
-iMessageManager/data/contacts.csv
+iMessageManager/data/
