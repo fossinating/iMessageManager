@@ -1,6 +1,7 @@
 import os
 import importlib
 import logger
+from tkinter import *
 
 # Loads all modules
 
@@ -13,8 +14,23 @@ for module_file in modules_folder:
     module = importlib.import_module("modules." + module_file.replace(".py", ""))
     modules.append(module)
 
-# Allow the user to select a module
+# Create window
 
+gui = Tk()
+gui.title("Tkinter window")
+gui.geometry("370x250")
+gui.resizable(False, False)
+
+# Create TextFileGenerator button
+
+textFileGeneratorButton = Button(gui, text="Text File Generator", )
+
+
+
+
+gui.mainloop()
+
+'''
 while True:
     print("\nSelect a module to run by entering the number next to the name:\n")
     i = 1
@@ -39,3 +55,4 @@ while True:
     selected_module = modules[selected_module_index - 1]
 
     selected_module.main()
+'''

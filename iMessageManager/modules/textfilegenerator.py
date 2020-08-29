@@ -1,6 +1,7 @@
 import messages
 import difflib
 import logger
+import tkinter
 
 module_name = "Text File Generator"
 
