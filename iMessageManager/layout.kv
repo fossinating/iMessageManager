@@ -1,0 +1,110 @@
+MenuManager:
+    MainMenu:
+    StatsMenu:
+    GraphsMenu:
+    SearchMenu:
+    UpdateDataMenu:
+    StartMenu:
+
+<MainMenu>:
+    name: "main"
+
+    GridLayout:
+        cols:2
+
+        Button:
+            text: "Stats"
+            on_release:
+                app.root.current = "stats"
+                root.manager.transition.direction = "left"
+        Button:
+            text: "Graphs"
+            on_release:
+                app.root.current = "graphs"
+                root.manager.transition.direction = "left"
+        Button:
+            text: "Search"
+            on_release:
+                app.root.current = "search"
+                root.manager.transition.direction = "left"
+        Button:
+            text: "Update Data"
+            on_release:
+                app.root.current = "update-data"
+                root.manager.transition.direction = "left"
+
+
+<StatsMenu>:
+    name: "stats"
+
+    GridLayout:
+        cols: 3
+
+        Button:
+            text: "Go Back"
+            on_release:
+                app.root.current = "main"
+                root.manager.transition.direction = "right"
+        Button:
+            text: "Go Back"
+            on_release:
+                app.root.current = "main"
+                root.manager.transition.direction = "right"
+        Button:
+            text: "Go Back"
+            on_release:
+                app.root.current = "main"
+                root.manager.transition.direction = "right"
+
+
+<GraphsMenu>:
+    name: "graphs"
+
+    Button:
+        text: "Go Back"
+        on_release:
+            app.root.current = "main"
+            root.manager.transition.direction = "right"
+
+
+<SearchMenu>:
+    name: "search"
+
+    GridLayout:
+        cols: 3
+
+        Button:
+            text: "Go Back"
+            on_release:
+                app.root.current = "main"
+                root.manager.transition.direction = "right"
+        Button:
+            text: "Go Back"
+            on_release:
+                app.root.current = "main"
+                root.manager.transition.direction = "right"
+        Button:
+            text: "Go Back"
+            on_release:
+                app.root.current = "main"
+                root.manager.transition.direction = "right"
+
+
+<UpdateDataMenu>:
+    name: "update-data"
+
+    Button:
+        text: "Go Back"
+        on_release:
+            app.root.current = "main"
+            root.manager.transition.direction = "right"
+
+
+<StartMenu>:
+    name: "start"
+
+    Button:
+        text: "Go Back"
+        on_release:
+            app.root.current = "main"
+            root.manager.transition.direction = "right"

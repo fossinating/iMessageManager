@@ -1,10 +1,14 @@
 import os
 import importlib
 import logger
-from tkinter import *
+from kivy.app import App
+from kivy.lang import Builder
+from kivy.uix.button import Button
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.screenmanager import Screen, ScreenManager
 
 # Loads all modules
-
+'''
 modules_folder = os.listdir("modules")
 modules = []
 for module_file in modules_folder:
@@ -13,22 +17,46 @@ for module_file in modules_folder:
     logger.debug("modules." + module_file)
     module = importlib.import_module("modules." + module_file.replace(".py", ""))
     modules.append(module)
-
-# Create window
-
-gui = Tk()
-gui.title("Tkinter window")
-gui.geometry("370x250")
-gui.resizable(False, False)
-
-# Create TextFileGenerator button
-
-textFileGeneratorButton = Button(gui, text="Text File Generator", )
+'''
 
 
+class MainMenu(Screen):
+    pass
 
 
-gui.mainloop()
+class StatsMenu(Screen):
+    pass
+
+
+class GraphsMenu(Screen):
+    pass
+
+
+class SearchMenu(Screen):
+    pass
+
+
+class UpdateDataMenu(Screen):
+    pass
+
+
+class StartMenu(Screen):
+    pass
+
+
+class MenuManager(ScreenManager):
+    pass
+
+
+kv = Builder.load_file("layout.kv")
+
+
+class MainApp(App):
+    def build(self):
+        return kv
+
+
+MainApp().run()
 
 '''
 while True:
