@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30907.101
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iMessageManager", "iMessageManager\iMessageManager.csproj", "{F4EBA1D4-6A1B-4976-AC2D-C422ACAD07DD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F4EBA1D4-6A1B-4976-AC2D-C422ACAD07DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4EBA1D4-6A1B-4976-AC2D-C422ACAD07DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4EBA1D4-6A1B-4976-AC2D-C422ACAD07DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4EBA1D4-6A1B-4976-AC2D-C422ACAD07DD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4E44C634-E94B-4C79-BD65-07AA17E200B3}
+	EndGlobalSection
+EndGlobal

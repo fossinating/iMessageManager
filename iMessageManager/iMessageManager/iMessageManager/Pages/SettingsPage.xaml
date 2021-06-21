@@ -1,0 +1,43 @@
+﻿<UserControl x:Class="iMessageManager.Pages.SettingsPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:iMessageManager.Pages"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"></ColumnDefinition>
+            <ColumnDefinition Width="1*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*"></RowDefinition>
+            <RowDefinition Height="1*"></RowDefinition>
+            <RowDefinition Height="12*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Label Grid.Row="0" Grid.Column="0" Content="Message Database Path:" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="10,0"></Label>
+        <Grid Grid.Column="1" Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"></ColumnDefinition>
+                <ColumnDefinition Width="1*"></ColumnDefinition>
+                <ColumnDefinition Width="1*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Row="0" Grid.Column="0" Name="messagesFilePathTextBlock" IsEnabled="True" VerticalAlignment="Center" TextAlignment="Left" ScrollViewer.HorizontalScrollBarVisibility="Visible"></TextBlock>
+            <Button Grid.Row="0" Grid.Column="1" Name="messagesFileSelectButton" Content="Select File" HorizontalAlignment="Center" VerticalAlignment="Center" Click="messagesFileSelectButton_Click"></Button>
+            <Button Grid.Row="0" Grid.Column="2" Name="autoMessagesFileSelectButton" Content="Auto Select" HorizontalAlignment="Center" VerticalAlignment="Center" Click="autoMessagesFileSelectButton_Click"></Button>
+        </Grid>
+        <Label Grid.Row="1" Grid.Column="0" Content="Contacts Path:" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="10,0"></Label>
+        <Grid Grid.Column="1" Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"></ColumnDefinition>
+                <ColumnDefinition Width="1*"></ColumnDefinition>
+                <ColumnDefinition Width="1*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Row="0" Grid.Column="0" Name="contactsPathTextBlock" IsEnabled="True" VerticalAlignment="Center" TextAlignment="Left" ScrollViewer.HorizontalScrollBarVisibility="Visible"></TextBlock>
+            <Button Grid.Row="0" Grid.Column="1" Name="contactsFileSelectButton" Content="Select File" HorizontalAlignment="Center" VerticalAlignment="Center" Click="contactFileSelectButton_Click"></Button>
+        </Grid>
+        <Button x:Name="backButton" Content="Back" HorizontalAlignment="Left" VerticalAlignment="Top" Click="backButton_Click"></Button>
+        <Button Grid.RowSpan="10" Grid.ColumnSpan="2" x:Name="saveButton" Content="Save" HorizontalAlignment="Center" VerticalAlignment="Bottom" Click="saveButton_Click"></Button>
+    </Grid>
+</UserControl>
