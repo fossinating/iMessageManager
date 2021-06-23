@@ -16,7 +16,7 @@ namespace iMessageManager
         {
             try
             {
-                connection = new SqliteConnection($"Data Source={path}");
+                connection = new SqliteConnection($"Data Source={path};Mode=ReadOnly");
                 connection.Open();
                 return true;
             }

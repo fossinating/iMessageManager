@@ -59,6 +59,7 @@ namespace iMessageManager.Pages
                     SELECT chat_id
                     FROM chat_message_join
                     WHERE message_id == '{messageID}'
+                    LIMIT 1
                 ";
             var reader = command.ExecuteReader();
 
@@ -66,7 +67,9 @@ namespace iMessageManager.Pages
 
             int chatID = reader.GetInt32(0);
             reader.Close();
+            command.Dispose();
 
+            command = MessageManager.connection.CreateCommand();
             command.CommandText =
                 $@"
                     SELECT message_id
@@ -87,57 +90,117 @@ namespace iMessageManager.Pages
                 }
             }
             reader.Close();
+            command.Dispose();
 
             List<Message> messages = new List<Message>();
+            int targetIndex = -1;
 
             foreach (int _messageID in messageIDQueue)
             {
+                command = MessageManager.connection.CreateCommand();
                 command.CommandText =
                     $@"
                         SELECT ROWID, text, handle_id, date, is_from_me, guid
                         FROM message
                         WHERE ROWID == '{_messageID}'
+                        LIMIT 1
                     ";
-
                 reader = command.ExecuteReader();
 
                 reader.Read();
 
-                int handle_id = reader.GetInt32(2);
+                Contact contact;
+                // if is from me, then no contact needed
+                if (reader.GetInt32(4) == 1)
+                {
+                    contact = null;
+                }
+                // otherwise, get id from handle
+                else
+                {
 
-                // get the id from the handle
+                    int handle_id = reader.GetInt32(2);
 
-                var hCommand = MessageManager.connection.CreateCommand();
+                    if (handle_id == 0)
+                    {
+                        if (!reader.IsDBNull(1))
+                        {
+                            MessageBox.Show($"Found a message (id {_messageID}) with handle 0 not listed as from me but it has message body \"{reader.GetString(1)}\"");
+                        }
+                        else
+                        {
+                            reader.Close();
+                            command.Dispose();
+                            continue;
+                        }
+                    }
 
-                hCommand.CommandText =
-                    $@"
+                    var hCommand = MessageManager.connection.CreateCommand();
+
+                    hCommand.CommandText =
+                        $@"
                         SELECT id
                         FROM handle
                         WHERE ROWID=='{handle_id}'
                     ";
 
-                var hReader = hCommand.ExecuteReader();
+                    var hReader = hCommand.ExecuteReader();
 
-                hReader.Read();
+                    bool exists = hReader.Read();
 
-                Contact contact = ContactsManager.getContact(hReader.GetString(0));
+                    contact = ContactsManager.getContact(hReader.GetString(0));
+                    hReader.Close();
+                    hCommand.Dispose();
+                }
 
-                Message message = new Message(
-                    reader.GetInt32(0),
-                    reader.GetString(1),
-                    contact,
-                    reader.GetInt64(3),
-                    reader.GetInt32(4) == 1,
-                    reader.GetGuid(5));
+                bool valid = true;
+                for (int i = 0; i <= 5; i++)
+                {
+                    if (reader.IsDBNull(i))
+                    {
+                        //MessageBox.Show($"Found null value at index {i} of messageID {_messageID}");
+                        valid = false;
+                        reader.Close();
+                        command.Dispose();
+                        break;
+                    }
+                }
+                if (valid)
+                {
+                    Message message = new Message(
+                        reader.GetInt32(0),
+                        reader.GetString(1),
+                        contact,
+                        reader.GetInt64(3),
+                        reader.GetInt32(4) == 1,
+                        reader.GetGuid(5));
+
+                    if (messageID == reader.GetInt32(0))
+                    {
+                        targetIndex = messages.Count();
+                    }
+
+                    messages.Add(message);
+                }
                 reader.Close();
-
-                messages.Add(message);
+                command.Dispose();
             }
 
-            foreach (Message message in messages)
+            messagesStackPanel.Children.Clear();
+            double offsetToTarget = 0;
+            int loadCount = 101;
+            int startIndex = Math.Max(0, targetIndex - (loadCount / 2));
+            int endIndex = Math.Min(messages.Count()-1, startIndex + loadCount);
+            foreach (Message message in messages.GetRange(startIndex, endIndex-startIndex+1))
             {
-                messagesStackPanel.Children.Add(message.GetMessageViewer());
+                MessageViewer messageViewer = message.GetMessageViewer();
+                messagesStackPanel.Children.Add(messageViewer);
+                if (message.messageID == messageID)
+                {
+                    offsetToTarget = messagesViewer.ExtentHeight;
+                }
             }
+            messagesViewer.ScrollToVerticalOffset(offsetToTarget);
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
@@ -205,6 +268,9 @@ namespace iMessageManager.Pages
                     // now that we have the chat id we can use that to get more information about the chat
                     int chat_id = cmjReader.GetInt32(0);
 
+                    cmjReader.Close();
+                    cmjCommand.Dispose();
+
                     // chat command, get style(for checking if its a group chat), chat_identifier, and display_name
 
                     var cCommand = MessageManager.connection.CreateCommand();
@@ -221,6 +287,9 @@ namespace iMessageManager.Pages
                     int style = cReader.GetInt32(0); // can be used to check if its a groupchat
                     string chat_identifier = cReader.GetString(1);
                     string display_name = cReader.GetString(2);
+
+                    cReader.Close();
+                    cCommand.Dispose();
 
                     if (style == 43)// means its a group chat
                     {
@@ -259,7 +328,8 @@ namespace iMessageManager.Pages
                     messagePreviews.Add(message);
                     conversationPanel.Children.Add(message);
                 }
-                
+                reader.Close();
+                command.Dispose();
             }
         }
     }

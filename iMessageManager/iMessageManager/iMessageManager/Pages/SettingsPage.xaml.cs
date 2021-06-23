@@ -65,8 +65,12 @@ namespace iMessageManager.Pages
         {
             string rootBackupPath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                 "Apple Computer\\MobileSync\\Backup\\");
-            if (Directory.Exists(rootBackupPath)) 
+            if (!Directory.Exists(rootBackupPath))
             {
+                rootBackupPath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                "Apple\\MobileSync\\Backup\\");
+            }
+            if (Directory.Exists(rootBackupPath)) {
                 if (Directory.GetDirectories(rootBackupPath).Length == 1)
                 {
                     string backupPath = System.IO.Path.Combine(rootBackupPath, Directory.GetDirectories(rootBackupPath).FirstOrDefault() + "\\");
@@ -86,6 +90,9 @@ namespace iMessageManager.Pages
                     reader.Read();
 
                     var fileID = reader.GetString(0);
+
+                    reader.Close();
+
 
                     string messageDirPath = System.IO.Path.Combine(backupPath, fileID.Substring(0, 2) + "\\");
 

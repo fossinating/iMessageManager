@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace iMessageManager
 {
@@ -26,7 +27,7 @@ namespace iMessageManager
         
         public MessageViewer GetMessageViewer()
         {
-            return new MessageViewer(text);
+            return new MessageViewer(text, (contact != null) ? contact.photo : "", fromMe, Util.cocoaToReadable(date));
         }
     }
 }

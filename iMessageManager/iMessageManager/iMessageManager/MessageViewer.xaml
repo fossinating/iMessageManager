@@ -5,8 +5,20 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:iMessageManager"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" Height="100" MinHeight="100" MaxHeight="100">
-    <Grid>
-        <Label x:Name="textLabel" Content="Message" Initialized="textLabel_Initialized"></Label>
+             d:DesignHeight="450" d:DesignWidth="800" Loaded="UserControl_Loaded">
+    <Grid Margin="5">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="50"></ColumnDefinition>
+            <ColumnDefinition Width="5*"></ColumnDefinition>
+            <ColumnDefinition Width="Auto"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Border x:Name="textBackground" Grid.Column="1" BorderThickness="1" BorderBrush="Black" Background="AntiqueWhite" CornerRadius="10">
+            <Border.Effect>
+                <DropShadowEffect x:Name="textDropShadow" Direction="225"/>
+            </Border.Effect>
+            <TextBlock x:Name="textLabel" Text="Message" TextWrapping="WrapWithOverflow" Foreground="White" Padding="5"></TextBlock>
+        </Border>
+        <Image MaxHeight="50" MinHeight="50" Grid.Column="0" x:Name="contactImage" VerticalAlignment="Top" HorizontalAlignment="Center" Stretch="UniformToFill"></Image>
+        <TextBlock x:Name="timeLabel" Grid.Column="2" Padding="5" HorizontalAlignment="Right" VerticalAlignment="Center" TextWrapping="WrapWithOverflow"></TextBlock>
     </Grid>
 </UserControl>
