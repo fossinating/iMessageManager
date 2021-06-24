@@ -332,5 +332,40 @@ namespace iMessageManager.Pages
                 command.Dispose();
             }
         }
+
+        private double lastScroll = 0;
+        private void messagesViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
+            bool scrollDown = messagesViewer.VerticalOffset > lastScroll;
+            lastScroll = messagesViewer.VerticalOffset;
+
+            int messagesToPurge = 0;
+
+            // different for loop rules for if it is scrolling down or up but same logic regardless
+            for (int i = 
+                scrollDown ? 0  // if scrolling down, i initialized at 0
+                : messagesStackPanel.Children.Count-1; // otherwise initialize i at one less than the number of messages loaded
+                scrollDown ? i < messagesStackPanel.Children.Count // if scrolling down, stop when it hits the max value
+                : i > 0; // otherwise stop when it hits zero
+                i += scrollDown ? 1 // if scrolling down, increment by one while going through the loop
+                : -1) // otherwise decrement by one
+            {
+                MessageViewer messageViewer = (MessageViewer)messagesStackPanel.Children[i];
+
+                /*
+                 okay logic check:
+
+                i want to make sure that above and below the scroller are balanced in way of messages
+                so
+                what i want to do is ...??? 
+
+                okay completely changing the logic here so i should commit what i have
+                but
+                what i want to do is go through all the messages, count the number above and below the visible box
+                if there is a significant difference(more than 5% of the total number) then take balance it*/
+
+               // if (messa)
+            }
+        }
     }
 }
