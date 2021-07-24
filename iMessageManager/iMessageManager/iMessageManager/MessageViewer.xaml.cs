@@ -20,10 +20,46 @@ namespace iMessageManager
     /// </summary>
     public partial class MessageViewer : UserControl
     {
-        private string text;
-        private string photoPath;
-        private bool fromMe;
-        private string date;
+        public static DependencyProperty TextProperty;
+        public static DependencyProperty PhotoPathProperty;
+        public static DependencyProperty FromMeProperty;
+        public static DependencyProperty DateProperty;
+
+        public String text
+        {
+            get { return (String)base.GetValue(TextProperty); }
+            set { base.SetValue(TextProperty, value); }
+        }
+
+        public String photoPath
+        {
+            get { return (String)base.GetValue(PhotoPathProperty); }
+            set { base.SetValue(PhotoPathProperty, value); }
+        }
+
+        public Boolean fromMe
+        {
+            get { return (Boolean)base.GetValue(FromMeProperty); }
+            set { base.SetValue(FromMeProperty, value); }
+        }
+
+        public String date
+        {
+            get { return (String)base.GetValue(DateProperty); }
+            set { base.SetValue(DateProperty, value); }
+        }
+
+        static MessageViewer()
+        {
+            TextProperty = DependencyProperty.Register("Text", typeof(String), typeof(MessageViewer));
+            PhotoPathProperty = DependencyProperty.Register("PhotoPath", typeof(String), typeof(MessageViewer));
+            FromMeProperty = DependencyProperty.Register("FromMe", typeof(Boolean), typeof(MessageViewer));
+            DateProperty = DependencyProperty.Register("PhotoPath", typeof(String), typeof(MessageViewer));
+        }
+
+        public MessageViewer() {
+            InitializeComponent();
+        }
         public MessageViewer(string text, string photoPath, bool fromMe, string date)
         {
             this.text = text;
@@ -35,6 +71,9 @@ namespace iMessageManager
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
+            var command = MessageManager.connection.CreateCommand();
+            command.CommandText = "SL";
+
             textLabel.Text = text;
             timeLabel.Text = date;
             if (this.fromMe)
@@ -60,6 +99,21 @@ namespace iMessageManager
                 image.UriSource = new Uri(photoPath, UriKind.Absolute);
                 image.EndInit();
                 contactImage.Source = image;
+            }
+        }
+
+        private double height = -1;
+
+        internal void nominateForNormalization(double v)
+        {
+            height = v;
+        }
+
+        private void ColumnDefinition_Initialized(object sender, EventArgs e)
+        {
+            if (height != -1)
+            {
+                ((ScrollViewer)((StackPanel)this.Parent).Parent).ScrollToVerticalOffset(height);
             }
         }
     }

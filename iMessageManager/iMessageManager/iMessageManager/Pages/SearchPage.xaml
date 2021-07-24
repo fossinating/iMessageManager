@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:iMessageManager.Pages"
+             xmlns:local="clr-namespace:iMessageManager.Pages" xmlns:imessagemanager="clr-namespace:iMessageManager"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" Loaded="UserControl_Loaded">
     <Grid>
@@ -23,7 +23,7 @@
                     <ColumnDefinition Width="1*"></ColumnDefinition>
                     <ColumnDefinition Width="2*"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
-                <Label Grid.Column="0" Content="Name:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
+                <Label x:Name="nameSearchLabel" Grid.Column="0" Content="Name:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
                 <TextBox x:Name="nameTextBox" Grid.Column="1"></TextBox>
             </Grid>
             <Grid Grid.Row="1">
@@ -31,7 +31,7 @@
                     <ColumnDefinition Width="1*"></ColumnDefinition>
                     <ColumnDefinition Width="2*"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
-                <Label Grid.Column="0" Content="Contains:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
+                <Label x:Name="contentSearchLabel" Grid.Column="0" Content="Contains:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
                 <TextBox x:Name="containsTextBox" Grid.Column="1"></TextBox>
             </Grid>
             <Button x:Name="searchButton" Grid.Column="0" Grid.Row="2" Content="Search" Click="searchButton_Click"></Button>
@@ -40,7 +40,15 @@
             </ScrollViewer>
         </Grid>
         <ScrollViewer x:Name="messagesViewer" Grid.Column="1">
-            <StackPanel x:Name="messagesStackPanel"></StackPanel>
+            <ScrollViewer.Resources>
+                <DataTemplate x:Key="NameDataStyle">
+                    <imessagemanager:MessageViewer text="{Binding XPath=@text}" date="{Binding XPath=@date}" fromMe="{Binding XPath=@fromMe}" photoPath="{Binding XPath=@photoPath}"></imessagemanager:MessageViewer>
+                </DataTemplate>
+            </ScrollViewer.Resources>
+            <VirtualizingStackPanel x:Name="messagesStackPanel">
+                <ListBox x:Name="messagesListBox" VirtualizingStackPanel.IsVirtualizing="True"
+                       ItemTemplate="{DynamicResource NameDataStyle}"/>
+            </VirtualizingStackPanel>
         </ScrollViewer>
     </Grid>
 </UserControl>
