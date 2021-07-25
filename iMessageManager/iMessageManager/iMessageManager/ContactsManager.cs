@@ -11,6 +11,8 @@ namespace iMessageManager
     {
         public static List<Contact> contacts { get; private set; }
 
+        // REDO USING BACKED UP CONTACTS UNDER ADDRESS BOOK
+
         public static bool getContactsFromVCard(string path)
         {
             contacts = new List<Contact>();

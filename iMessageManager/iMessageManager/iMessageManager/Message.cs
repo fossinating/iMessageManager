@@ -9,25 +9,25 @@ namespace iMessageManager
 {
     class Message
     {
-        public int messageID { get; private set; }
-        public string text { get; private set; }
-        public Contact contact { get; private set; }
-        public long date { get; private set; }
-        public bool fromMe { get; private set; }
-        public Guid guid { get; private set; }
+        public int MessageID { get; private set; }
+        public string Text { get; private set; }
+        public Contact Contact { get; private set; }
+        public long Date { get; private set; }
+        public bool FromMe { get; private set; }
+        public Guid Guid { get; private set; }
 
         public Message(int messageID, string text, Contact contact, long date, bool fromMe, Guid guid) {
-            this.messageID = messageID;
-            this.text = text;
-            this.contact = contact;
-            this.date = date;
-            this.fromMe = fromMe;
-            this.guid = guid;
+            this.MessageID = messageID;
+            this.Text = text;
+            this.Contact = contact;
+            this.Date = date;
+            this.FromMe = fromMe;
+            this.Guid = guid;
         }
         
         public MessageViewer GetMessageViewer()
         {
-            return new MessageViewer(text, (contact != null) ? contact.photo : "", fromMe, Util.cocoaToReadable(date));
+            return new MessageViewer(Text, (Contact != null) ? Contact.photo : "", FromMe, Util.cocoaToReadable(Date));
         }
     }
 }

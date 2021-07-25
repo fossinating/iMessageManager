@@ -95,3 +95,4 @@ C:\Users\david\Documents\GitHub\iMessageManager\iMessageManager\iMessageManager\
 C:\Users\david\Documents\GitHub\iMessageManager\iMessageManager\iMessageManager\iMessageManager\obj\Debug\iMessageManager.exe
 C:\Users\david\Documents\GitHub\iMessageManager\iMessageManager\iMessageManager\iMessageManager\obj\Debug\iMessageManager.pdb
 C:\Users\david\Documents\GitHub\iMessageManager\iMessageManager\iMessageManager\iMessageManager\obj\Debug\GeneratedInternalTypeHelper.g.cs
+D:\Projects\iMessageManager\iMessageManager\iMessageManager\iMessageManager\obj\Debug\GeneratedInternalTypeHelper.g.cs

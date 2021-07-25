@@ -20,32 +20,34 @@ namespace iMessageManager
     /// </summary>
     public partial class MessageViewer : UserControl
     {
+
+        // im gonna want to move to loading all the data here instead
         public static DependencyProperty TextProperty;
         public static DependencyProperty PhotoPathProperty;
         public static DependencyProperty FromMeProperty;
         public static DependencyProperty DateProperty;
 
-        public String text
+        public string Text
         {
-            get { return (String)base.GetValue(TextProperty); }
+            get { return (string)base.GetValue(TextProperty); }
             set { base.SetValue(TextProperty, value); }
         }
 
-        public String photoPath
+        public string PhotoPath
         {
-            get { return (String)base.GetValue(PhotoPathProperty); }
+            get { return (string)base.GetValue(PhotoPathProperty); }
             set { base.SetValue(PhotoPathProperty, value); }
         }
 
-        public Boolean fromMe
+        public bool FromMe
         {
-            get { return (Boolean)base.GetValue(FromMeProperty); }
+            get { return (bool)base.GetValue(FromMeProperty); }
             set { base.SetValue(FromMeProperty, value); }
         }
 
-        public String date
+        public string Date
         {
-            get { return (String)base.GetValue(DateProperty); }
+            get { return (string)base.GetValue(DateProperty); }
             set { base.SetValue(DateProperty, value); }
         }
 
@@ -54,7 +56,7 @@ namespace iMessageManager
             TextProperty = DependencyProperty.Register("Text", typeof(String), typeof(MessageViewer));
             PhotoPathProperty = DependencyProperty.Register("PhotoPath", typeof(String), typeof(MessageViewer));
             FromMeProperty = DependencyProperty.Register("FromMe", typeof(Boolean), typeof(MessageViewer));
-            DateProperty = DependencyProperty.Register("PhotoPath", typeof(String), typeof(MessageViewer));
+            DateProperty = DependencyProperty.Register("Date", typeof(String), typeof(MessageViewer));
         }
 
         public MessageViewer() {
@@ -62,10 +64,10 @@ namespace iMessageManager
         }
         public MessageViewer(string text, string photoPath, bool fromMe, string date)
         {
-            this.text = text;
-            this.photoPath = photoPath;
-            this.fromMe = fromMe;
-            this.date = date;
+            this.Text = text;
+            this.PhotoPath = photoPath;
+            this.FromMe = fromMe;
+            this.Date = date;
             InitializeComponent();
         }
 
@@ -74,9 +76,9 @@ namespace iMessageManager
             var command = MessageManager.connection.CreateCommand();
             command.CommandText = "SL";
 
-            textLabel.Text = text;
-            timeLabel.Text = date;
-            if (this.fromMe)
+            textLabel.Text = Text;
+            timeLabel.Text = Date;
+            if (this.FromMe)
             {
                 SolidColorBrush myBrush = new SolidColorBrush();
                 myBrush.Color = Color.FromRgb(28, 77, 255);
@@ -92,11 +94,11 @@ namespace iMessageManager
                 textLabel.TextAlignment = TextAlignment.Left;
                 textDropShadow.Direction = 225;
             }
-            if (photoPath != null && photoPath != "")
+            if (PhotoPath != null && PhotoPath != "")
             {
                 BitmapImage image = new BitmapImage();
                 image.BeginInit();
-                image.UriSource = new Uri(photoPath, UriKind.Absolute);
+                image.UriSource = new Uri(PhotoPath, UriKind.Absolute);
                 image.EndInit();
                 contactImage.Source = image;
             }

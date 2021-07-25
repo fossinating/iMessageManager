@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -23,7 +24,7 @@ namespace iMessageManager.Pages
     {
 
         private List<MessagePreview> messagePreviews = new List<MessagePreview>();
-        private List<Message> messages = new List<Message>();
+        private ObservableCollection<Message> messages = new ObservableCollection<Message>();
         private int currentStartIndex = -1;
         private bool ignoreScrollUpdate = false;
 
@@ -56,6 +57,7 @@ namespace iMessageManager.Pages
 
         private void loadConversation(int messageID)
         {
+            messagesListBox.Items.Clear();
             var command = MessageManager.connection.CreateCommand();
             command.CommandText =
                 $@"
@@ -94,10 +96,6 @@ namespace iMessageManager.Pages
             }
             reader.Close();
             command.Dispose();
-
-
-            messagesListBox.ItemsSource = messageIDQueue;
-            return;
 
             int targetIndex = -1;
 
@@ -192,25 +190,9 @@ namespace iMessageManager.Pages
                 command.Dispose();
             }
 
-            messagesStackPanel.Children.Clear();
-            MessageViewer target = null;
-            int loadCount = 101;
-            int startIndex = Math.Max(0, targetIndex - (loadCount / 2));
-            currentStartIndex = startIndex;
-            int endIndex = Math.Min(messages.Count()-1, startIndex + loadCount);
-            foreach (Message message in messages.GetRange(startIndex, endIndex-startIndex+1))
-            {
-                MessageViewer messageViewer = message.GetMessageViewer();
-                messagesStackPanel.Children.Add(messageViewer);
-                if (message.messageID == messageID)
-                {
-                    target = messageViewer;
-                }
-            }
-            ignoreScrollUpdate = true;
-            Point relativePoint = target.TransformToAncestor(messagesStackPanel)
-                              .Transform(new Point(0, 0));
-            messagesViewer.ScrollToVerticalOffset(relativePoint.Y);
+            messagesListBox.ItemsSource = messages;
+            messagesListBox.SelectedIndex = targetIndex;
+            messagesListBox.ScrollIntoView(messagesListBox.SelectedItem);
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
@@ -344,83 +326,6 @@ namespace iMessageManager.Pages
         }
 
         private double lastScroll = 0;
-        private void messagesViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
-        {
-            if (ignoreScrollUpdate)
-            {
-                ignoreScrollUpdate = false;
-                return;
-            }
-
-            bool scrollDown = messagesViewer.VerticalOffset > lastScroll;
-            lastScroll = messagesViewer.VerticalOffset;
-
-            int upperMessages = 0;
-            int lowerMessages = 0;
-
-            foreach (MessageViewer messageViewer in messagesStackPanel.Children)
-            {
-                Point relativePoint = messageViewer.TransformToAncestor(messagesViewer)
-                              .Transform(new Point(0, 0));
-                if (relativePoint.Y < -messageViewer.ActualHeight)
-                {
-                    upperMessages++;
-                } else if (relativePoint.Y > messagesViewer.ActualHeight)
-                {
-                    lowerMessages++;
-                }
-            }
-
-            int messageShift = Math.Abs((upperMessages - lowerMessages) / 2);
-            bool updatingMessages = false;
-            double verticalChange = 0;
-            if (scrollDown)
-            {
-                if (upperMessages - lowerMessages > messagesStackPanel.Children.Count * 0.05)
-                {
-                    updatingMessages = true;
-                    messageShift = Math.Min(messages.Count - (currentStartIndex + messagesStackPanel.Children.Count + 1), messageShift);
-                    verticalChange = -getVerticalOffset(messagesStackPanel.Children[messageShift]);
-                    messagesStackPanel.Children.RemoveRange(0, messageShift);
-                    foreach (Message message in messages.GetRange(currentStartIndex + messagesStackPanel.Children.Count + 1, messageShift))
-                    {
-                        messagesStackPanel.Children.Add(message.GetMessageViewer());
-                    }
-                    currentStartIndex += messageShift;
-                    ignoreScrollUpdate = true;
-                }
-            } else
-            {
-                if (lowerMessages - upperMessages > messagesStackPanel.Children.Count * 0.05)
-                {
-                    updatingMessages = true;
-                    messageShift = Math.Min(currentStartIndex, messageShift);
-                    verticalChange = -getVerticalOffset(messagesStackPanel.Children[messageShift]);
-                    Console.WriteLine(getVerticalOffset(messagesStackPanel.Children[messageShift]));
-                    messagesStackPanel.Children.RemoveRange(messagesStackPanel.Children.Count - 1 - messageShift, messageShift);
-                    List<Message> range = messages.GetRange(currentStartIndex - messageShift, messageShift);
-                    bool first = true;
-                    foreach (Message message in range)
-                    {
-                        MessageViewer viewer = message.GetMessageViewer();
-                        if (first)
-                        {
-                            viewer.nominateForNormalization(getVerticalOffset(messagesStackPanel.Children[messagesStackPanel.Children.Count / 2]));
-                            first = false;
-                        }
-                        messagesStackPanel.Children.Insert(range.IndexOf(message), viewer);
-                        //MessageBox.Show(viewer.ActualHeight.ToString());
-                    }
-                    Console.WriteLine(getVerticalOffset(messagesStackPanel.Children[messageShift]));
-                    verticalChange += getVerticalOffset(messagesStackPanel.Children[messageShift]);
-                    currentStartIndex -= messageShift;
-                    ignoreScrollUpdate = true;
-                }
-            }
-            messagesViewer.ScrollToVerticalOffset(messagesViewer.VerticalOffset + verticalChange);
-            nameSearchLabel.Content = currentStartIndex + " : " + (currentStartIndex + messagesStackPanel.Children.Count) + "\n" + verticalChange;
-            contentSearchLabel.Content = lowerMessages + " : " + upperMessages + "(" + updatingMessages + ")";
-        }
 
         private double getVerticalOffset(UIElement element)
         {
