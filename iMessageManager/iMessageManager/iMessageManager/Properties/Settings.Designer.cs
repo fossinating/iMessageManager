@@ -26,12 +26,12 @@ namespace iMessageManager.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string messagesPath {
+        public string backupPath {
             get {
-                return ((string)(this["messagesPath"]));
+                return ((string)(this["backupPath"]));
             }
             set {
-                this["messagesPath"] = value;
+                this["backupPath"] = value;
             }
         }
         

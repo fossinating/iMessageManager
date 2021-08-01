@@ -22,86 +22,64 @@ namespace iMessageManager
     {
 
         // im gonna want to move to loading all the data here instead
-        public static DependencyProperty TextProperty;
-        public static DependencyProperty PhotoPathProperty;
-        public static DependencyProperty FromMeProperty;
-        public static DependencyProperty DateProperty;
+        public static DependencyProperty MessageIDProperty;
 
-        public string Text
+        public string MessageID
         {
-            get { return (string)base.GetValue(TextProperty); }
-            set { base.SetValue(TextProperty, value); }
-        }
-
-        public string PhotoPath
-        {
-            get { return (string)base.GetValue(PhotoPathProperty); }
-            set { base.SetValue(PhotoPathProperty, value); }
-        }
-
-        public bool FromMe
-        {
-            get { return (bool)base.GetValue(FromMeProperty); }
-            set { base.SetValue(FromMeProperty, value); }
-        }
-
-        public string Date
-        {
-            get { return (string)base.GetValue(DateProperty); }
-            set { base.SetValue(DateProperty, value); }
+            get { return (string)base.GetValue(MessageIDProperty); }
+            set { base.SetValue(MessageIDProperty, value); }
         }
 
         static MessageViewer()
         {
-            TextProperty = DependencyProperty.Register("Text", typeof(String), typeof(MessageViewer));
-            PhotoPathProperty = DependencyProperty.Register("PhotoPath", typeof(String), typeof(MessageViewer));
-            FromMeProperty = DependencyProperty.Register("FromMe", typeof(Boolean), typeof(MessageViewer));
-            DateProperty = DependencyProperty.Register("Date", typeof(String), typeof(MessageViewer));
+            MessageIDProperty = DependencyProperty.Register("MessageID", typeof(String), typeof(MessageViewer));
         }
 
         public MessageViewer() {
             InitializeComponent();
         }
-        public MessageViewer(string text, string photoPath, bool fromMe, string date)
-        {
-            this.Text = text;
-            this.PhotoPath = photoPath;
-            this.FromMe = fromMe;
-            this.Date = date;
-            InitializeComponent();
-        }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            var command = MessageManager.connection.CreateCommand();
-            command.CommandText = "SL";
+            var command = MessageManager.messagesConnection.CreateCommand();
+            command.CommandText = 
+                $@"SELECT text, handle_id, date, is_from_me FROM message
+                    WHERE ROWID = '{MessageID}' LIMIT 1";
 
-            textLabel.Text = Text;
-            timeLabel.Text = Date;
-            if (this.FromMe)
+            var reader = command.ExecuteReader();
+            if (reader.Read())
             {
-                SolidColorBrush myBrush = new SolidColorBrush();
-                myBrush.Color = Color.FromRgb(28, 77, 255);
-                textBackground.Background = myBrush;
-                textLabel.TextAlignment = TextAlignment.Right;
-                textDropShadow.Direction = 315;
+                if (!(reader.IsDBNull(0) || reader.IsDBNull(1) || reader.IsDBNull(2) || reader.IsDBNull(3)))
+                {
+                    textLabel.Text = reader.GetString(0);
+                    timeLabel.Text = Util.cocoaToReadable(reader.GetInt64(2));
+                    if (reader.GetBoolean(3))
+                    {
+                        // if is from me
+                        SolidColorBrush myBrush = new SolidColorBrush();
+                        myBrush.Color = Color.FromRgb(28, 77, 255);
+                        textBackground.Background = myBrush;
+                        textLabel.TextAlignment = TextAlignment.Right;
+                        textDropShadow.Direction = 315;
+                    }
+                    else
+                    {
+                        // if is not from me
+                        SolidColorBrush myBrush = new SolidColorBrush();
+                        myBrush.Color = Color.FromRgb(46, 46, 46);
+                        textBackground.Background = myBrush;
+                        textLabel.TextAlignment = TextAlignment.Left;
+                        textDropShadow.Direction = 225;
+                        Contact contact = ContactsManager.FromHandle(reader.GetInt32(1));
+                        if (contact.photo != null && contact.photo.Length > 0)
+                        {
+                            contactImage.Source = Util.ToImage(contact.photo);
+                        }
+                    }
+                }
             }
-            else
-            {
-                SolidColorBrush myBrush = new SolidColorBrush();
-                myBrush.Color = Color.FromRgb(46, 46, 46);
-                textBackground.Background = myBrush;
-                textLabel.TextAlignment = TextAlignment.Left;
-                textDropShadow.Direction = 225;
-            }
-            if (PhotoPath != null && PhotoPath != "")
-            {
-                BitmapImage image = new BitmapImage();
-                image.BeginInit();
-                image.UriSource = new Uri(PhotoPath, UriKind.Absolute);
-                image.EndInit();
-                contactImage.Source = image;
-            }
+            reader.Close();
+            command.Dispose();
         }
 
         private double height = -1;

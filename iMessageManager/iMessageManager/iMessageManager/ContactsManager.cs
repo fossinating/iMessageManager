@@ -13,58 +13,103 @@ namespace iMessageManager
 
         // REDO USING BACKED UP CONTACTS UNDER ADDRESS BOOK
 
-        public static bool getContactsFromVCard(string path)
+        private static string RegexID(string id)
         {
-            contacts = new List<Contact>();
-            StreamReader file = new StreamReader(path);
-            string line;
-            Contact currentContact = new Contact();
-            while ((line = file.ReadLine()) != null)
-            {
-                if (line.StartsWith("BEGIN:VCARD"))
-                {
-                    currentContact = new Contact();
-                } else if (line.StartsWith("FN:"))
-                {
-                    currentContact.fullName = line.Substring(3);
-                } else if (line.StartsWith("N:"))
-                {
-                    string[] name = line.Substring(2).Split(';');
-                    currentContact.firstName = name[1];
-                    currentContact.lastName = name[0];
-                } else if (line.StartsWith("TEL:") || line.StartsWith("TEL;"))
-                {
-                    var phoneNumberUtil = PhoneNumbers.PhoneNumberUtil.GetInstance();
-                    var phoneNumber = phoneNumberUtil.Parse(line.Substring(line.IndexOf(":") + 1), "US");
+            string result = "";
 
-                    currentContact.phoneNumbers.Add(phoneNumberUtil.Format(phoneNumber, PhoneNumbers.PhoneNumberFormat.E164));
-                } else if (line.StartsWith("EMAIL:"))
-                {
-                    currentContact.emails.Add(line.Substring(line.IndexOf(":") + 1));
-                } else if (line.StartsWith("PHOTO:"))
-                {
-                    currentContact.photo = line.Substring(6) + file.ReadLine().Substring(1);
-                } else if (line.StartsWith("END:VCARD"))
-                {
-                    contacts.Add(currentContact);
-                }
+            foreach (char sub in id)
+            {
+                result = result + "[^0-9]*" + sub;
             }
-            return true;
+
+            return "/(" + result + ")/";
         }
 
-        public static Contact getContact(string id) // id can be either a phone number or an email
+        public static Contact GetContact(string id) // id can be either a phone number or an email
         {
-            foreach (Contact contact in contacts)
-            {
-                foreach(string contact_id in contact.phoneNumbers.Concat(contact.emails).ToList())
+            using(var multiValueCommand = MessageManager.contactsConnection.CreateCommand()){
+                multiValueCommand.CommandText =
+                $@"SELECT record_id FROM ABMultiValue
+                    WHERE (property = 3 OR property = 4) AND idmatch(value, '{id}')";
+
+                using (var multiValueReader = multiValueCommand.ExecuteReader())
                 {
-                    if (contact_id.ToLower() == id.ToLower())
+                    if (multiValueReader.Read())
                     {
-                        return contact;
+                        int record_id = multiValueReader.GetInt32(0);
+                        using (var personCommand = MessageManager.contactsConnection.CreateCommand())
+                        {
+                            personCommand.CommandText =
+                                $@"SELECT FIRST, LAST, IMAGETYPE FROM ABPerson
+                            WHERE ROWID = '{record_id}'";
+                            var personReader = personCommand.ExecuteReader();
+
+                            if (personReader.Read())
+                            {
+                                Contact contact = new Contact(personReader.IsDBNull(0) ? "" : personReader.GetString(0), personReader.IsDBNull(1) ? "" : personReader.GetString(1));
+
+                                if (!personReader.IsDBNull(2) && personReader.GetString(2) == "PHOTO")
+                                {
+                                    using (var thumbnailImageCommand = MessageManager.contactsImagesConnection.CreateCommand())
+                                    {
+                                        thumbnailImageCommand.CommandText =
+                                            $@"SELECT data FROM ABThumbnailImage
+                                        WHERE record_id = '{record_id}'";
+
+                                        using (var thumbnailImageReader = thumbnailImageCommand.ExecuteReader())
+                                        {
+                                            if (thumbnailImageReader.Read() && !thumbnailImageReader.IsDBNull(0))
+                                            {
+                                                byte[] h = null;
+                                                using (MemoryStream mm = new MemoryStream())
+                                                {
+                                                    using (var rs = thumbnailImageReader.GetStream(0))
+                                                    {
+                                                        rs.CopyTo(mm);
+                                                    }
+                                                    h = mm.ToArray();
+                                                }
+                                                contact.photo = h;
+                                            }
+                                        }
+                                    }
+                                }
+                                return contact;
+                            }
+                            else
+                            {
+                                return null;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                } 
+            }
+        }
+
+        public static Contact FromHandle(int handleID)
+        {
+            using (var command = MessageManager.messagesConnection.CreateCommand())
+            {
+                command.CommandText =
+                    $@"SELECT id FROM handle
+                    WHERE ROWID = '{handleID}'";
+
+                using (var reader = command.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        return GetContact(reader.GetString(0));
+                    }
+                    else
+                    {
+                        return null;
                     }
                 }
             }
-            return null;
         }
     }
 }

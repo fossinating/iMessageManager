@@ -4,17 +4,17 @@
 winexe
 C#
 .cs
-C:\Users\david\Documents\GitHub\iMessageManager\iMessageManager\iMessageManager\iMessageManager\obj\Debug\
+D:\Projects\iMessageManager\iMessageManager\iMessageManager\iMessageManager\obj\Debug\
 iMessageManager
 none
 false
 DEBUG;TRACE
-C:\Users\david\Documents\GitHub\iMessageManager\iMessageManager\iMessageManager\iMessageManager\App.xaml
+D:\Projects\iMessageManager\iMessageManager\iMessageManager\iMessageManager\App.xaml
 6207660563
-3-707703546
-16-265179493
-2624267645
+3-1431110443
+17-1264828518
+32-1320015772
 MainWindow.xaml;MessagePreview.xaml;MessageViewer.xaml;Pages\SearchPage.xaml;Pages\SettingsPage.xaml;Pages\StartPage.xaml;
 
-True
+False
 

@@ -28,27 +28,16 @@ namespace iMessageManager
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            bool messagePathMissing = Properties.Settings.Default.messagesPath == "";
+            bool messagePathMissing = Properties.Settings.Default.backupPath == "";
             bool contactsPathMissing = Properties.Settings.Default.contactsPath == "";
-            if (messagePathMissing && contactsPathMissing)
+            if (messagePathMissing)
             {
                 contentControl.Content = settingsPage;
-                MessageBox.Show("We did not find a messages path or contacts path currently selected, please define one in this page");
-            } else if (messagePathMissing)
-            {
-                ContactsManager.getContactsFromVCard(Properties.Settings.Default.contactsPath);
-                contentControl.Content = settingsPage;
-                MessageBox.Show("We did not find a messages path currently selected, please define one in this page");
-            } else if (contactsPathMissing)
-            {
-                MessageManager.loadMessageDatabase(Properties.Settings.Default.messagesPath);
-                contentControl.Content = settingsPage;
-                MessageBox.Show("We did not find a contacts path currently selected, please define one in this page");
+                MessageBox.Show("We did not find a backup path currently selected, please define one in this page");
             } else
             {
                 contentControl.Content = startPage;
-                ContactsManager.getContactsFromVCard(Properties.Settings.Default.contactsPath);
-                MessageManager.loadMessageDatabase(Properties.Settings.Default.messagesPath);
+                MessageManager.LoadBackup(Properties.Settings.Default.backupPath);
             }
         }
 

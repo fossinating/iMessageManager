@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.Sqlite;
 using Microsoft.Win32;
+using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -28,8 +29,7 @@ namespace iMessageManager.Pages
         {
             InitializeComponent();
             this.sourceWindow = sourceWindow;
-            messagesFilePathTextBlock.Text = Properties.Settings.Default.messagesPath;
-            contactsPathTextBlock.Text = Properties.Settings.Default.contactsPath;
+            backupPathSelectTextBlock.Text = Properties.Settings.Default.backupPath;
         }
 
         private void backButton_Click(object sender, RoutedEventArgs e)
@@ -37,31 +37,29 @@ namespace iMessageManager.Pages
             sourceWindow.changePage(sourceWindow.startPage);
         }
 
-        private void messagesFileSelectButton_Click(object sender, RoutedEventArgs e)
+        private void backupPathSelectButton_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog dialog = new OpenFileDialog();
-            dialog.Filter = "All files (*.*)|*.*";
-            bool? success = dialog.ShowDialog();
-            if ((bool)success)
+            using (var dialog = new CommonOpenFileDialog())
             {
-                messagesFilePathTextBlock.Text = dialog.FileName;
+                dialog.InitialDirectory = "C:";
+                dialog.IsFolderPicker = true;
+                if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+                {
+                    backupPathSelectTextBlock.Text = dialog.FileName;
+                }
             }
         }
 
         private void saveButton_Click(object sender, RoutedEventArgs e)
         {
-            if (Properties.Settings.Default.messagesPath != messagesFilePathTextBlock.Text && MessageManager.loadMessageDatabase(messagesFilePathTextBlock.Text))
+            if (Properties.Settings.Default.backupPath != backupPathSelectTextBlock.Text && MessageManager.LoadBackup(backupPathSelectTextBlock.Text))
             {
-                Properties.Settings.Default.messagesPath = messagesFilePathTextBlock.Text;
-            }
-            if (Properties.Settings.Default.contactsPath != contactsPathTextBlock.Text && ContactsManager.getContactsFromVCard(contactsPathTextBlock.Text))
-            {
-                Properties.Settings.Default.contactsPath = contactsPathTextBlock.Text;
+                Properties.Settings.Default.backupPath = backupPathSelectTextBlock.Text;
             }
             Properties.Settings.Default.Save();
         }
 
-        private void autoMessagesFileSelectButton_Click(object sender, RoutedEventArgs e)
+        private void autoBackupPathSelectButton_Click(object sender, RoutedEventArgs e)
         {
             string rootBackupPath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                 "Apple Computer\\MobileSync\\Backup\\");
@@ -71,61 +69,21 @@ namespace iMessageManager.Pages
                 "Apple\\MobileSync\\Backup\\");
             }
             if (Directory.Exists(rootBackupPath)) {
-                if (Directory.GetDirectories(rootBackupPath).Length == 1)
+                foreach (var dir in Directory.GetDirectories(rootBackupPath))
                 {
                     string backupPath = System.IO.Path.Combine(rootBackupPath, Directory.GetDirectories(rootBackupPath).FirstOrDefault() + "\\");
-                    string backupManifestPath = System.IO.Path.Combine(backupPath, "manifest.db");
-                    SqliteConnection connection = new SqliteConnection($"Data Source={backupManifestPath}");
-                    connection.Open();
-
-                    var command = connection.CreateCommand();
-                    command.CommandText =
-                        @"
-                            SELECT fileID
-                            FROM Files
-                            WHERE relativePath = 'Library/SMS/sms.db'
-                        ";
-
-                    var reader = command.ExecuteReader();
-                    reader.Read();
-
-                    var fileID = reader.GetString(0);
-
-                    reader.Close();
-
-
-                    string messageDirPath = System.IO.Path.Combine(backupPath, fileID.Substring(0, 2) + "\\");
-
-                    if (Directory.Exists(messageDirPath))
+                    if (MessageManager.LoadBackup(backupPath))
                     {
-                        string messagePath = System.IO.Path.Combine(messageDirPath, fileID);
-                        if (File.Exists(messagePath))
-                        {
-                            messagesFilePathTextBlock.Text = messagePath;
-                            MessageBox.Show("Successfully found the message database");
-                        } else
-                        {
-                            MessageBox.Show("Message database somehow doesn't exist");
-                        }
-                    } else
-                    {
-                        MessageBox.Show("Something failed with finding the message directory");
+                        backupPathSelectTextBlock.Text = backupPath;
+                        MessageBox.Show("Successfully found the backup");
+                        return;
                     }
                 }
+
+                MessageBox.Show("Could not find a valid backup in the backups folder");
             } else
             {
                 MessageBox.Show("Could not find a backup folder");
-            }
-        }
-
-        private void contactFileSelectButton_Click(object sender, RoutedEventArgs e)
-        {
-            OpenFileDialog dialog = new OpenFileDialog();
-            dialog.Filter = "vCard Files (*.vcf)|*.vcf|All files (*.*)|*.*";
-            bool? success = dialog.ShowDialog();
-            if ((bool)success)
-            {
-                contactsPathTextBlock.Text = dialog.FileName;
             }
         }
     }

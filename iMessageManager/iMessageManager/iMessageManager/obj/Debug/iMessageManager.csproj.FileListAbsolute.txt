@@ -96,3 +96,7 @@ C:\Users\david\Documents\GitHub\iMessageManager\iMessageManager\iMessageManager\
 C:\Users\david\Documents\GitHub\iMessageManager\iMessageManager\iMessageManager\iMessageManager\obj\Debug\iMessageManager.pdb
 C:\Users\david\Documents\GitHub\iMessageManager\iMessageManager\iMessageManager\iMessageManager\obj\Debug\GeneratedInternalTypeHelper.g.cs
 D:\Projects\iMessageManager\iMessageManager\iMessageManager\iMessageManager\obj\Debug\GeneratedInternalTypeHelper.g.cs
+D:\Projects\iMessageManager\iMessageManager\iMessageManager\iMessageManager\bin\Debug\Microsoft.WindowsAPICodePack.dll
+D:\Projects\iMessageManager\iMessageManager\iMessageManager\iMessageManager\bin\Debug\Microsoft.WindowsAPICodePack.Shell.dll
+D:\Projects\iMessageManager\iMessageManager\iMessageManager\iMessageManager\bin\Debug\Microsoft.WindowsAPICodePack.xml
+D:\Projects\iMessageManager\iMessageManager\iMessageManager\iMessageManager\bin\Debug\Microsoft.WindowsAPICodePack.Shell.xml

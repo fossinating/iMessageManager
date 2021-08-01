@@ -24,10 +24,5 @@ namespace iMessageManager
             this.FromMe = fromMe;
             this.Guid = guid;
         }
-        
-        public MessageViewer GetMessageViewer()
-        {
-            return new MessageViewer(Text, (Contact != null) ? Contact.photo : "", FromMe, Util.cocoaToReadable(Date));
-        }
     }
 }

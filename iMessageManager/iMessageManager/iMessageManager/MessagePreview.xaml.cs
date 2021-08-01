@@ -26,7 +26,7 @@ namespace iMessageManager
             get; private set;
         }
 
-        public MessagePreview(int messageID, string name, string content, string time, string imagePath, Pages.SearchPage searchPage)
+        public MessagePreview(int messageID, string name, string content, string time, byte[] imageData, Pages.SearchPage searchPage)
         {
             InitializeComponent();
             this.searchPage = searchPage;
@@ -36,13 +36,9 @@ namespace iMessageManager
             messageLabel.Content = content;
             timeLabel.Content = time;
 
-            if (imagePath != null && imagePath != "")
+            if (imageData != null && imageData.Length > 0)
             {
-                BitmapImage image = new BitmapImage();
-                image.BeginInit();
-                image.UriSource = new Uri(imagePath, UriKind.Absolute);
-                image.EndInit();
-                contactImage.Source = image;
+                contactImage.Source = Util.ToImage(imageData);
             }
         }
 

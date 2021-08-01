@@ -57,8 +57,7 @@ namespace iMessageManager.Pages
 
         private void loadConversation(int messageID)
         {
-            messagesListBox.Items.Clear();
-            var command = MessageManager.connection.CreateCommand();
+            var command = MessageManager.messagesConnection.CreateCommand();
             command.CommandText =
                 $@"
                     SELECT chat_id
@@ -74,7 +73,7 @@ namespace iMessageManager.Pages
             reader.Close();
             command.Dispose();
 
-            command = MessageManager.connection.CreateCommand();
+            command = MessageManager.messagesConnection.CreateCommand();
             command.CommandText =
                 $@"
                     SELECT message_id
@@ -85,10 +84,10 @@ namespace iMessageManager.Pages
             reader = command.ExecuteReader();
 
             int messageIndex = -1;
-            List<int> messageIDQueue = new List<int>();
+            List<MessageShell> messageIDQueue = new List<MessageShell>();
             while (reader.Read())
             {
-                messageIDQueue.Add(reader.GetInt32(0));
+                messageIDQueue.Add(new MessageShell(reader.GetString(0)));
                 if (reader.GetInt32(0) == messageID)
                 {
                     messageIndex = messageIDQueue.Count - 1;
@@ -97,11 +96,16 @@ namespace iMessageManager.Pages
             reader.Close();
             command.Dispose();
 
-            int targetIndex = -1;
+            messagesListBox.ItemsSource = messageIDQueue;
+            messagesListBox.Items.Refresh();
+            messagesListBox.SelectedIndex = messageIndex;
+            messagesListBox.ScrollIntoView(messagesListBox.SelectedItem);
+
+            /*int targetIndex = -1;
 
             foreach (int _messageID in messageIDQueue)
             {
-                command = MessageManager.connection.CreateCommand();
+                command = MessageManager.messagesConnection.CreateCommand();
                 command.CommandText =
                     $@"
                         SELECT ROWID, text, handle_id, date, is_from_me, guid
@@ -139,7 +143,7 @@ namespace iMessageManager.Pages
                         }
                     }
 
-                    var hCommand = MessageManager.connection.CreateCommand();
+                    var hCommand = MessageManager.messagesConnection.CreateCommand();
 
                     hCommand.CommandText =
                         $@"
@@ -152,7 +156,7 @@ namespace iMessageManager.Pages
 
                     bool exists = hReader.Read();
 
-                    contact = ContactsManager.getContact(hReader.GetString(0));
+                    contact = ContactsManager.GetContact(hReader.GetString(0));
                     hReader.Close();
                     hCommand.Dispose();
                 }
@@ -192,7 +196,7 @@ namespace iMessageManager.Pages
 
             messagesListBox.ItemsSource = messages;
             messagesListBox.SelectedIndex = targetIndex;
-            messagesListBox.ScrollIntoView(messagesListBox.SelectedItem);
+            messagesListBox.ScrollIntoView(messagesListBox.SelectedItem);*/
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
@@ -208,14 +212,14 @@ namespace iMessageManager.Pages
 
         private void searchButton_Click(object sender, RoutedEventArgs e)
         {
-            if (!MessageManager.isDatabaseLoaded())
+            if (!MessageManager.IsDatabaseLoaded())
             {
                 MessageBox.Show("There is not a message database loaded currently");
                 return;
             }
             clearMessages();
 
-            var command = MessageManager.connection.CreateCommand();
+            var command = MessageManager.messagesConnection.CreateCommand();
 
             command.CommandText =
                 $@"
@@ -242,10 +246,10 @@ namespace iMessageManager.Pages
 
                     // Get the name (have fun with this david :/)
                     string name;
-                    string imgSource = "";
+                    byte[] imgSource = null;
 
                     // chat_message_join command, get the chat id from message id
-                    var cmjCommand = MessageManager.connection.CreateCommand();
+                    var cmjCommand = MessageManager.messagesConnection.CreateCommand();
                     cmjCommand.CommandText =
                         $@"
                             SELECT chat_id
@@ -265,7 +269,7 @@ namespace iMessageManager.Pages
 
                     // chat command, get style(for checking if its a group chat), chat_identifier, and display_name
 
-                    var cCommand = MessageManager.connection.CreateCommand();
+                    var cCommand = MessageManager.messagesConnection.CreateCommand();
                     cCommand.CommandText =
                         $@"
                             SELECT style,chat_identifier,display_name
@@ -294,7 +298,7 @@ namespace iMessageManager.Pages
                         }
                     } else // non-group chat
                     {
-                        Contact contact = ContactsManager.getContact(chat_identifier);
+                        Contact contact = ContactsManager.GetContact(chat_identifier);
                         if (contact != null)
                         {
                             name = contact.fullName;
@@ -323,15 +327,6 @@ namespace iMessageManager.Pages
                 reader.Close();
                 command.Dispose();
             }
-        }
-
-        private double lastScroll = 0;
-
-        private double getVerticalOffset(UIElement element)
-        {
-            Point relativePoint = element.TransformToAncestor(messagesStackPanel)
-                              .Transform(new Point(0, 0));
-            return relativePoint.Y;
         }
     }
 }
