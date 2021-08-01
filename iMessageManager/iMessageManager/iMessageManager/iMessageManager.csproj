@@ -104,6 +104,7 @@
     <Compile Include="Contact.cs" />
     <Compile Include="ContactsManager.cs" />
     <Compile Include="Message.cs" />
+    <Compile Include="MessageProvider.cs" />
     <Compile Include="MessageShell.cs" />
     <Compile Include="MessageViewer.xaml.cs">
       <DependentUpon>MessageViewer.xaml</DependentUpon>
