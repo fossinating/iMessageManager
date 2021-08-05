@@ -20,19 +20,33 @@ namespace iMessageManager
     /// </summary>
     public partial class MessageViewer : UserControl
     {
+        public static DependencyProperty FirstNameProperty;
+        public static DependencyProperty LastNameProperty;
+        public static DependencyProperty PhotoProperty;
 
-        // im gonna want to move to loading all the data here instead
-        public static DependencyProperty MessageIDProperty;
-
-        public string MessageID
+        public string FirstName
         {
-            get { return (string)base.GetValue(MessageIDProperty); }
-            set { base.SetValue(MessageIDProperty, value); }
+            get => (string)base.GetValue(FirstNameProperty);
+            set { base.SetValue(FirstNameProperty, value); }
+        }
+
+        public string LastName
+        {
+            get { return (string)base.GetValue(LastNameProperty); }
+            set { base.SetValue(LastNameProperty, value); }
+        }
+
+        public byte[] Photo
+        {
+            get { return (byte[])base.GetValue(PhotoProperty); }
+            set { base.SetValue(PhotoProperty, value); }
         }
 
         static MessageViewer()
         {
-            MessageIDProperty = DependencyProperty.Register("MessageID", typeof(String), typeof(MessageViewer));
+            FirstNameProperty = DependencyProperty.Register("FirstName", typeof(string), typeof(MessageViewer));
+            LastNameProperty = DependencyProperty.Register("LastName", typeof(string), typeof(MessageViewer));
+            PhotoProperty = DependencyProperty.Register("Photo", typeof(byte[]), typeof(MessageViewer));
         }
 
         public MessageViewer() {

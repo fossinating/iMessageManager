@@ -14,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Diagnostics;
 
 namespace iMessageManager.Pages
 {
@@ -57,146 +58,148 @@ namespace iMessageManager.Pages
 
         private void loadConversation(int messageID)
         {
-            var command = MessageManager.messagesConnection.CreateCommand();
-            command.CommandText =
-                $@"
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            using (var chatIDCommand = MessageManager.messagesConnection.CreateCommand())
+            {
+                chatIDCommand.CommandText =
+                    $@"
                     SELECT chat_id
                     FROM chat_message_join
                     WHERE message_id == '{messageID}'
                     LIMIT 1
                 ";
-            var reader = command.ExecuteReader();
-
-            reader.Read();
-
-            int chatID = reader.GetInt32(0);
-            reader.Close();
-            command.Dispose();
-
-            command = MessageManager.messagesConnection.CreateCommand();
-            command.CommandText =
-                $@"
-                    SELECT message_id
-                    FROM chat_message_join
-                    WHERE chat_id == '{chatID}'
-                    ORDER BY message_date ASC
-                ";
-            reader = command.ExecuteReader();
-
-            int messageIndex = -1;
-            List<MessageShell> messageIDQueue = new List<MessageShell>();
-            while (reader.Read())
-            {
-                messageIDQueue.Add(new MessageShell(reader.GetString(0)));
-                if (reader.GetInt32(0) == messageID)
-                {
-                    messageIndex = messageIDQueue.Count - 1;
-                }
-            }
-            reader.Close();
-            command.Dispose();
-
-            messagesListBox.ItemsSource = messageIDQueue;
-            messagesListBox.Items.Refresh();
-            messagesListBox.SelectedIndex = messageIndex;
-            messagesListBox.ScrollIntoView(messagesListBox.SelectedItem);
-
-            /*int targetIndex = -1;
-
-            foreach (int _messageID in messageIDQueue)
-            {
-                command = MessageManager.messagesConnection.CreateCommand();
-                command.CommandText =
-                    $@"
-                        SELECT ROWID, text, handle_id, date, is_from_me, guid
-                        FROM message
-                        WHERE ROWID == '{_messageID}'
-                        LIMIT 1
-                    ";
-                reader = command.ExecuteReader();
-
-                reader.Read();
-
-                Contact contact;
-                // if is from me, then no contact needed
-                if (reader.GetInt32(4) == 1)
-                {
-                    contact = null;
-                }
-                // otherwise, get id from handle
-                else
+                using (var chatIDReader = chatIDCommand.ExecuteReader())
                 {
 
-                    int handle_id = reader.GetInt32(2);
+                    chatIDReader.Read();
 
-                    if (handle_id == 0)
+                    int chatID = chatIDReader.GetInt32(0);
+
+                    using (var msgIDCommand = MessageManager.messagesConnection.CreateCommand())
                     {
-                        if (!reader.IsDBNull(1))
-                        {
-                            MessageBox.Show($"Found a message (id {_messageID}) with handle 0 not listed as from me but it has message body \"{reader.GetString(1)}\"");
-                        }
-                        else
-                        {
-                            reader.Close();
-                            command.Dispose();
-                            continue;
-                        }
-                    }
-
-                    var hCommand = MessageManager.messagesConnection.CreateCommand();
-
-                    hCommand.CommandText =
+                        msgIDCommand.CommandText =
                         $@"
-                        SELECT id
-                        FROM handle
-                        WHERE ROWID=='{handle_id}'
-                    ";
+                            SELECT message_id
+                            FROM chat_message_join
+                            WHERE chat_id == '{chatID}'
+                            ORDER BY message_date ASC
+                        ";
+                        using (var msgIDReader = msgIDCommand.ExecuteReader())
+                        {
+                            List<int> messageIDQueue = new List<int>();
+                            while (msgIDReader.Read())
+                            {
+                                messageIDQueue.Add(msgIDReader.GetInt32(0));
+                            }
+                            int targetIndex = -1;
 
-                    var hReader = hCommand.ExecuteReader();
+                            foreach (int _messageID in messageIDQueue)
+                            {
+                                using (var msgCommand = MessageManager.messagesConnection.CreateCommand())
+                                {
+                                    msgCommand.CommandText =
+                                    $@"
+                                        SELECT ROWID, text, handle_id, date, is_from_me, guid
+                                        FROM message
+                                        WHERE ROWID == '{_messageID}'
+                                        LIMIT 1
+                                    ";
+                                    using (var msgReader = msgCommand.ExecuteReader())
+                                    {
 
-                    bool exists = hReader.Read();
+                                        msgReader.Read();
 
-                    contact = ContactsManager.GetContact(hReader.GetString(0));
-                    hReader.Close();
-                    hCommand.Dispose();
-                }
+                                        Contact contact;
+                                        // if is from me, then no contact needed
+                                        if (msgReader.GetInt32(4) == 1)
+                                        {
+                                            contact = null;
+                                        }
+                                        // otherwise, get id from handle
+                                        else
+                                        {
 
-                bool valid = true;
-                for (int i = 0; i <= 5; i++)
-                {
-                    if (reader.IsDBNull(i))
-                    {
-                        //MessageBox.Show($"Found null value at index {i} of messageID {_messageID}");
-                        valid = false;
-                        reader.Close();
-                        command.Dispose();
-                        break;
+                                            int handle_id = msgReader.GetInt32(2);
+
+                                            if (handle_id == 0)
+                                            {
+                                                if (!msgReader.IsDBNull(1))
+                                                {
+                                                    MessageBox.Show($"Found a message (id {_messageID}) with handle 0 not listed as from me but it has message body \"{msgReader.GetString(1)}\"");
+                                                }
+                                                else
+                                                {
+                                                    continue;
+                                                }
+                                            }
+
+                                            using (var hCommand = MessageManager.messagesConnection.CreateCommand())
+                                            {
+                                                hCommand.CommandText =
+                                                    $@"
+                                                        SELECT id
+                                                        FROM handle
+                                                        WHERE ROWID=='{handle_id}'
+                                                    ";
+
+                                                using (var hReader = hCommand.ExecuteReader())
+                                                {
+
+                                                    if (hReader.Read())
+                                                    {
+                                                        contact = ContactsManager.GetContact(hReader.GetString(0));
+                                                    } else
+                                                    {
+                                                        contact = null;
+                                                    }
+
+                                                }
+                                            }
+                                            
+                                        }
+
+                                        bool valid = true;
+                                        for (int i = 0; i <= 5; i++)
+                                        {
+                                            if (msgReader.IsDBNull(i))
+                                            {
+                                                //MessageBox.Show($"Found null value at index {i} of messageID {_messageID}");
+                                                valid = false;
+                                                break;
+                                            }
+                                        }
+                                        if (valid)
+                                        {
+                                            Message message = new Message(
+                                                msgReader.GetInt32(0),
+                                                msgReader.GetString(1),
+                                                contact,
+                                                msgReader.GetInt64(3),
+                                                msgReader.GetInt32(4) == 1,
+                                                msgReader.GetGuid(5));
+
+                                            if (messageID == msgReader.GetInt32(0))
+                                            {
+                                                targetIndex = messages.Count();
+                                            }
+
+                                            messages.Add(message);
+                                        }
+                                    }
+                                }
+                            }
+
+                            messagesListBox.ItemsSource = messages;
+                            messagesListBox.Items.Refresh();
+                            messagesListBox.SelectedIndex = targetIndex;
+                            messagesListBox.ScrollIntoView(messagesListBox.SelectedItem);
+                            sw.Stop();
+                            MessageBox.Show($"Loaded {messages.Count} messages in {sw.Elapsed}, an average of {sw.ElapsedMilliseconds/messages.Count}ms per message");
+                        }
                     }
                 }
-                if (valid)
-                {
-                    Message message = new Message(
-                        reader.GetInt32(0),
-                        reader.GetString(1),
-                        contact,
-                        reader.GetInt64(3),
-                        reader.GetInt32(4) == 1,
-                        reader.GetGuid(5));
-
-                    if (messageID == reader.GetInt32(0))
-                    {
-                        targetIndex = messages.Count();
-                    }
-
-                    messages.Add(message);
-                }
-                reader.Close();
-                command.Dispose();
             }
-
-            messagesListBox.ItemsSource = messages;
-            messagesListBox.SelectedIndex = targetIndex;
-            messagesListBox.ScrollIntoView(messagesListBox.SelectedItem);*/
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
