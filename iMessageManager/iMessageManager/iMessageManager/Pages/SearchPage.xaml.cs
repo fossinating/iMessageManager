@@ -58,8 +58,6 @@ namespace iMessageManager.Pages
 
         private void loadConversation(int messageID)
         {
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
             using (var chatIDCommand = MessageManager.connection.CreateCommand())
             {
                 chatIDCommand.CommandText =
@@ -81,8 +79,6 @@ namespace iMessageManager.Pages
                     messagesListBox.Items.Refresh();
                     messagesListBox.SelectedIndex = targetIndex;
                     messagesListBox.ScrollIntoView(messagesListBox.SelectedItem);
-                    sw.Stop();
-                    MessageBox.Show($"Loaded {messages.Count} messages in {sw.Elapsed}, an average of {((double)sw.ElapsedMilliseconds)/messages.Count}ms per message");
                 }
             }
         }
