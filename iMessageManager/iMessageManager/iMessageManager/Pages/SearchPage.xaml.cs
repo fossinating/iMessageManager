@@ -60,12 +60,13 @@ namespace iMessageManager.Pages
         {
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            using (var chatIDCommand = MessageManager.messagesConnection.CreateCommand())
+            int targetIndex = -1;
+            using (var chatIDCommand = MessageManager.connection.CreateCommand())
             {
                 chatIDCommand.CommandText =
                     $@"
                     SELECT chat_id
-                    FROM chat_message_join
+                    FROM messages_master
                     WHERE message_id == '{messageID}'
                     LIMIT 1
                 ";
@@ -76,128 +77,85 @@ namespace iMessageManager.Pages
 
                     int chatID = chatIDReader.GetInt32(0);
 
-                    using (var msgIDCommand = MessageManager.messagesConnection.CreateCommand())
+                    using (var msgCommand = MessageManager.connection.CreateCommand())
                     {
-                        msgIDCommand.CommandText =
+                        msgCommand.CommandText =
                         $@"
-                            SELECT message_id
-                            FROM chat_message_join
+                            SELECT *
+                            FROM messages_master
                             WHERE chat_id == '{chatID}'
-                            ORDER BY message_date ASC
+                            ORDER BY date ASC
                         ";
-                        using (var msgIDReader = msgIDCommand.ExecuteReader())
+                        using (var msgReader = msgCommand.ExecuteReader())
                         {
-                            List<int> messageIDQueue = new List<int>();
-                            while (msgIDReader.Read())
+                            while (msgReader.Read())
                             {
-                                messageIDQueue.Add(msgIDReader.GetInt32(0));
-                            }
-                            int targetIndex = -1;
 
-                            foreach (int _messageID in messageIDQueue)
-                            {
-                                using (var msgCommand = MessageManager.messagesConnection.CreateCommand())
+                                Contact contact;
+                                // if is from me, then no contact needed
+                                if (msgReader.GetInt32(msgReader.GetOrdinal("is_from_me")) == 1)
                                 {
-                                    msgCommand.CommandText =
-                                    $@"
-                                        SELECT ROWID, text, handle_id, date, is_from_me, guid
-                                        FROM message
-                                        WHERE ROWID == '{_messageID}'
-                                        LIMIT 1
-                                    ";
-                                    using (var msgReader = msgCommand.ExecuteReader())
+                                    contact = null;
+                                }
+                                // otherwise, get id from handle
+                                else
+                                {
+
+                                    int handle_id = msgReader.GetInt32(msgReader.GetOrdinal("handle_id"));
+
+                                    if (handle_id == 0)
                                     {
-
-                                        msgReader.Read();
-
-                                        Contact contact;
-                                        // if is from me, then no contact needed
-                                        if (msgReader.GetInt32(4) == 1)
+                                        if (!msgReader.IsDBNull(msgReader.GetOrdinal("text")))
                                         {
-                                            contact = null;
+                                            MessageBox.Show($"Found a message (id {msgReader.GetInt32(msgReader.GetOrdinal("message_id"))}) with handle 0 not listed as from me but it has message body \"{msgReader.GetString(1)}\"");
                                         }
-                                        // otherwise, get id from handle
                                         else
                                         {
-
-                                            int handle_id = msgReader.GetInt32(2);
-
-                                            if (handle_id == 0)
-                                            {
-                                                if (!msgReader.IsDBNull(1))
-                                                {
-                                                    MessageBox.Show($"Found a message (id {_messageID}) with handle 0 not listed as from me but it has message body \"{msgReader.GetString(1)}\"");
-                                                }
-                                                else
-                                                {
-                                                    continue;
-                                                }
-                                            }
-
-                                            using (var hCommand = MessageManager.messagesConnection.CreateCommand())
-                                            {
-                                                hCommand.CommandText =
-                                                    $@"
-                                                        SELECT id
-                                                        FROM handle
-                                                        WHERE ROWID=='{handle_id}'
-                                                    ";
-
-                                                using (var hReader = hCommand.ExecuteReader())
-                                                {
-
-                                                    if (hReader.Read())
-                                                    {
-                                                        contact = ContactsManager.GetContact(hReader.GetString(0));
-                                                    } else
-                                                    {
-                                                        contact = null;
-                                                    }
-
-                                                }
-                                            }
-                                            
-                                        }
-
-                                        bool valid = true;
-                                        for (int i = 0; i <= 5; i++)
-                                        {
-                                            if (msgReader.IsDBNull(i))
-                                            {
-                                                //MessageBox.Show($"Found null value at index {i} of messageID {_messageID}");
-                                                valid = false;
-                                                break;
-                                            }
-                                        }
-                                        if (valid)
-                                        {
-                                            Message message = new Message(
-                                                msgReader.GetInt32(0),
-                                                msgReader.GetString(1),
-                                                contact,
-                                                msgReader.GetInt64(3),
-                                                msgReader.GetInt32(4) == 1,
-                                                msgReader.GetGuid(5));
-
-                                            if (messageID == msgReader.GetInt32(0))
-                                            {
-                                                targetIndex = messages.Count();
-                                            }
-
-                                            messages.Add(message);
+                                            continue;
                                         }
                                     }
+
+                                    contact = ContactsManager.FromHandle(handle_id);
+
+                                }
+
+                                bool valid = true;
+                                for (int i = 0; i <= 5; i++)
+                                {
+                                    if (msgReader.IsDBNull(i))
+                                    {
+                                        //MessageBox.Show($"Found null value at index {i} of messageID {_messageID}");
+                                        valid = false;
+                                        break;
+                                    }
+                                }
+                                if (valid)
+                                {
+                                    Message message = new Message(
+                                        msgReader.GetInt32(msgReader.GetOrdinal("handle_id")),
+                                        msgReader.GetString(msgReader.GetOrdinal("text")),
+                                        contact,
+                                        msgReader.GetInt64(msgReader.GetOrdinal("date")),
+                                        msgReader.GetInt32(msgReader.GetOrdinal("is_from_me")) == 1,
+                                        msgReader.GetGuid(msgReader.GetOrdinal("message_guid")));
+
+                                    if (messageID == msgReader.GetInt32(0))
+                                    {
+                                        targetIndex = messages.Count;
+                                    }
+
+                                    messages.Add(message);
                                 }
                             }
-
-                            messagesListBox.ItemsSource = messages;
-                            messagesListBox.Items.Refresh();
-                            messagesListBox.SelectedIndex = targetIndex;
-                            messagesListBox.ScrollIntoView(messagesListBox.SelectedItem);
-                            sw.Stop();
-                            MessageBox.Show($"Loaded {messages.Count} messages in {sw.Elapsed}, an average of {sw.ElapsedMilliseconds/messages.Count}ms per message");
                         }
                     }
+
+                    messagesListBox.ItemsSource = messages;
+                    messagesListBox.Items.Refresh();
+                    messagesListBox.SelectedIndex = targetIndex;
+                    messagesListBox.ScrollIntoView(messagesListBox.SelectedItem);
+                    sw.Stop();
+                    MessageBox.Show($"Loaded {messages.Count} messages in {sw.Elapsed}, an average of {sw.ElapsedMilliseconds/messages.Count}ms per message");
                 }
             }
         }
@@ -222,7 +180,7 @@ namespace iMessageManager.Pages
             }
             clearMessages();
 
-            var command = MessageManager.messagesConnection.CreateCommand();
+            var command = MessageManager.connection.CreateCommand();
 
             command.CommandText =
                 $@"
@@ -252,7 +210,7 @@ namespace iMessageManager.Pages
                     byte[] imgSource = null;
 
                     // chat_message_join command, get the chat id from message id
-                    var cmjCommand = MessageManager.messagesConnection.CreateCommand();
+                    var cmjCommand = MessageManager.connection.CreateCommand();
                     cmjCommand.CommandText =
                         $@"
                             SELECT chat_id
@@ -272,7 +230,7 @@ namespace iMessageManager.Pages
 
                     // chat command, get style(for checking if its a group chat), chat_identifier, and display_name
 
-                    var cCommand = MessageManager.messagesConnection.CreateCommand();
+                    var cCommand = MessageManager.connection.CreateCommand();
                     cCommand.CommandText =
                         $@"
                             SELECT style,chat_identifier,display_name

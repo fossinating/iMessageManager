@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using Microsoft.Data.Sqlite;
 
 namespace iMessageManager
 {
@@ -27,9 +28,9 @@ namespace iMessageManager
 
         public static Contact GetContact(string id) // id can be either a phone number or an email
         {
-            using(var multiValueCommand = MessageManager.contactsConnection.CreateCommand()){
+            using(var multiValueCommand = MessageManager.connection.CreateCommand()){
                 multiValueCommand.CommandText =
-                $@"SELECT record_id FROM ABMultiValue
+                $@"SELECT record_id FROM addressBook.ABMultiValue
                     WHERE (property = 3 OR property = 4) AND idmatch(value, '{id}')";
 
                 using (var multiValueReader = multiValueCommand.ExecuteReader())
@@ -37,10 +38,10 @@ namespace iMessageManager
                     if (multiValueReader.Read())
                     {
                         int record_id = multiValueReader.GetInt32(0);
-                        using (var personCommand = MessageManager.contactsConnection.CreateCommand())
+                        using (var personCommand = MessageManager.connection.CreateCommand())
                         {
                             personCommand.CommandText =
-                                $@"SELECT FIRST, LAST, IMAGETYPE FROM ABPerson
+                                $@"SELECT FIRST, LAST, IMAGETYPE FROM addressBook.ABPerson
                             WHERE ROWID = '{record_id}'";
                             var personReader = personCommand.ExecuteReader();
 
@@ -50,10 +51,10 @@ namespace iMessageManager
 
                                 if (!personReader.IsDBNull(2) && personReader.GetString(2) == "PHOTO")
                                 {
-                                    using (var thumbnailImageCommand = MessageManager.contactsImagesConnection.CreateCommand())
+                                    using (var thumbnailImageCommand = MessageManager.connection.CreateCommand())
                                     {
                                         thumbnailImageCommand.CommandText =
-                                            $@"SELECT data FROM ABThumbnailImage
+                                            $@"SELECT data FROM addressBookImages.ABThumbnailImage
                                         WHERE record_id = '{record_id}'";
 
                                         using (var thumbnailImageReader = thumbnailImageCommand.ExecuteReader())
@@ -90,9 +91,30 @@ namespace iMessageManager
             }
         }
 
+        public static Contact FromReader(SqliteDataReader reader)
+        {
+            Contact contact = new Contact(reader.GetString(reader.GetOrdinal("first")), reader.GetString(reader.GetOrdinal("last")));
+
+            if (!reader.IsDBNull(reader.GetOrdinal("image_data")))
+            {
+                byte[] h = null;
+                using (MemoryStream mm = new MemoryStream())
+                {
+                    using (var rs = reader.GetStream(reader.GetOrdinal("image_data")))
+                    {
+                        rs.CopyTo(mm);
+                    }
+                    h = mm.ToArray();
+                }
+                contact.photo = h;
+            }
+
+            return contact;
+        }
+
         public static Contact FromHandle(int handleID)
         {
-            using (var command = MessageManager.messagesConnection.CreateCommand())
+            using (var command = MessageManager.connection.CreateCommand())
             {
                 command.CommandText =
                     $@"SELECT id FROM handle

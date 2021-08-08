@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace iMessageManager
 {
-    class Contact
+    public class Contact
     {
         public string fullName;
         public List<string> phoneNumbers = new List<string>();

@@ -1,0 +1,56 @@
+2021-08-05 19:53:13.146 -04:00 [INF] Loaded 5 extensions
+2021-08-05 19:53:14.948 -04:00 [INF] MSBuild registered from C:\Program Files\dotnet\sdk\5.0.302\
+2021-08-05 19:53:15.899 -04:00 [INF] Found Visual Studio v16.10.31515.178 [C:\Program Files (x86)\Microsoft Visual Studio\2019\Community]
+2021-08-05 19:53:18.739 -04:00 [INF] Initializing upgrade step Select an entrypoint
+2021-08-05 19:53:18.744 -04:00 [INF] Setting entrypoint to only project in solution: D:\Projects\iMessageManager\iMessageManager\iMessageManager\iMessageManager\iMessageManager.csproj
+2021-08-05 19:53:18.764 -04:00 [INF] Initializing upgrade step Select project to upgrade
+2021-08-05 19:53:19.130 -04:00 [INF] Initializing upgrade step Back up project
+2021-08-05 19:53:30.742 -04:00 [INF] Applying upgrade step Back up project
+2021-08-05 19:53:35.138 -04:00 [INF] Backing up D:\Projects\iMessageManager\iMessageManager\iMessageManager\iMessageManager to D:\Projects\iMessageManager\iMessageManager\iMessageManager.backup\iMessageManager
+2021-08-05 19:53:36.993 -04:00 [INF] Project backed up to D:\Projects\iMessageManager\iMessageManager\iMessageManager.backup\iMessageManager
+2021-08-05 19:53:36.995 -04:00 [INF] Upgrade step Back up project applied successfully
+2021-08-05 19:53:39.077 -04:00 [INF] Initializing upgrade step Convert project file to SDK style
+2021-08-05 19:53:41.305 -04:00 [INF] Applying upgrade step Convert project file to SDK style
+2021-08-05 19:53:41.308 -04:00 [INF] Converting project file format with try-convert, version 0.9.232202
+2021-08-05 19:53:42.192 -04:00 [INF] [dotnet] D:\Projects\iMessageManager\iMessageManager\iMessageManager\iMessageManager\iMessageManager.csproj contains an App.config file. App.config is replaced by appsettings.json in .NET Core. You will need to delete App.config and migrate to appsettings.json if it's applicable to your project.
+2021-08-05 19:53:44.433 -04:00 [INF] [dotnet] Conversion complete!
+2021-08-05 19:53:45.621 -04:00 [INF] Project file converted successfully! The project may require additional changes to build successfully against the new .NET target.
+2021-08-05 19:53:48.555 -04:00 [INF] Upgrade step Convert project file to SDK style applied successfully
+2021-08-05 19:53:53.766 -04:00 [INF] Initializing upgrade step Clean up NuGet package references
+2021-08-05 19:53:56.212 -04:00 [INF] Reference to .NET Upgrade Assistant analyzer package (Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers, version 0.2.237901) needs added
+2021-08-05 19:53:56.224 -04:00 [INF] Packages to be added: Operation { Item = Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers, Version=0.2.237901, OperationDetails = OperationDetails { Risk = None, Details = System.Linq.EmptyPartition`1[System.String] } }
+2021-08-05 19:53:58.054 -04:00 [INF] Applying upgrade step Clean up NuGet package references
+2021-08-05 19:53:58.071 -04:00 [INF] Adding package reference: Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers, Version=0.2.237901
+2021-08-05 19:54:00.965 -04:00 [INF] Upgrade step Clean up NuGet package references applied successfully
+2021-08-05 19:54:16.276 -04:00 [INF] Initializing upgrade step Update TFM
+2021-08-05 19:54:16.288 -04:00 [INF] Recommending Windows TFM net5.0-windows because the project either has Windows-specific dependencies or builds to a WinExe
+2021-08-05 19:54:16.290 -04:00 [INF] TFM needs updated to net5.0-windows
+2021-08-05 19:54:18.038 -04:00 [INF] Applying upgrade step Update TFM
+2021-08-05 19:54:18.047 -04:00 [INF] Recommending Windows TFM net5.0-windows because the project either has Windows-specific dependencies or builds to a WinExe
+2021-08-05 19:54:26.449 -04:00 [INF] Updated TFM to net5.0-windows
+2021-08-05 19:54:26.450 -04:00 [INF] Upgrade step Update TFM applied successfully
+2021-08-05 19:54:30.811 -04:00 [INF] Initializing upgrade step Update NuGet Packages
+2021-08-05 19:54:32.669 -04:00 [INF] Adding Microsoft.Windows.Compatibility 5.0.2
+2021-08-05 19:54:32.672 -04:00 [INF] Packages to be added: Operation { Item = Microsoft.Windows.Compatibility, Version=5.0.2, OperationDetails = OperationDetails { Risk = None, Details = System.Linq.EmptyPartition`1[System.String] } }
+2021-08-05 19:54:38.884 -04:00 [INF] Applying upgrade step Update NuGet Packages
+2021-08-05 19:54:38.885 -04:00 [INF] Adding package reference: Microsoft.Windows.Compatibility, Version=5.0.2
+2021-08-05 19:54:57.096 -04:00 [INF] Marking package System.Data.DataSetExtensions for removal because it appears to be a transitive dependency
+2021-08-05 19:54:57.151 -04:00 [INF] Removing outdated package reference: System.Data.DataSetExtensions, Version=4.5.0
+2021-08-05 19:54:59.674 -04:00 [INF] Upgrade step Update NuGet Packages applied successfully
+2021-08-05 19:55:08.719 -04:00 [INF] Initializing upgrade step Add template files
+2021-08-05 19:55:08.730 -04:00 [INF] 0 expected template items needed
+2021-08-05 19:55:08.731 -04:00 [INF] Initializing upgrade step Upgrade app config files
+2021-08-05 19:55:08.772 -04:00 [INF] Found 0 app settings for upgrade: 
+2021-08-05 19:55:08.776 -04:00 [INF] Found 0 connection strings for upgrade: 
+2021-08-05 19:55:08.782 -04:00 [INF] Initializing upgrade step Update source code
+2021-08-05 19:55:10.652 -04:00 [INF] Initializing upgrade step Move to next project
+2021-08-05 19:55:14.189 -04:00 [INF] Applying upgrade step Move to next project
+2021-08-05 19:55:14.191 -04:00 [INF] Upgrade step Move to next project applied successfully
+2021-08-05 19:55:15.902 -04:00 [INF] Recommending Windows TFM net5.0-windows because the project either has Windows-specific dependencies or builds to a WinExe
+2021-08-05 19:55:15.906 -04:00 [INF] Recommending Windows TFM net5.0-windows because the project either has Windows-specific dependencies or builds to a WinExe
+2021-08-05 19:55:15.912 -04:00 [INF] Recommending Windows TFM net5.0-windows because the project either has Windows-specific dependencies or builds to a WinExe
+2021-08-05 19:55:15.913 -04:00 [INF] Initializing upgrade step Finalize upgrade
+2021-08-05 19:55:15.919 -04:00 [INF] Recommending Windows TFM net5.0-windows because the project either has Windows-specific dependencies or builds to a WinExe
+2021-08-05 19:55:18.387 -04:00 [INF] Applying upgrade step Finalize upgrade
+2021-08-05 19:55:18.388 -04:00 [INF] Upgrade step Finalize upgrade applied successfully
+2021-08-05 19:55:19.813 -04:00 [INF] Upgrade has completed. Please review any changes.

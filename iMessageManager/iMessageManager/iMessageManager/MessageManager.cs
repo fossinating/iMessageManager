@@ -11,10 +11,9 @@ namespace iMessageManager
 {
     abstract class MessageManager
     {
-        public static SqliteConnection messagesConnection { get; private set; }
-        public static SqliteConnection contactsConnection { get; private set; }
-        public static SqliteConnection contactsImagesConnection { get; private set; }
+        public static SqliteConnection connection { get; private set; }
         private static string backupPath;
+        public const string preloadPath = "./preloadMessages.db";
 
         public static string GetPath(string relativePath)
         {
@@ -59,16 +58,32 @@ namespace iMessageManager
             }
         }
 
-        private static SqliteConnection GetConnection(string relativePath)
+        private static SqliteConnection GetConnection(string exactPath)
         {
-            var connection = new SqliteConnection($"Data Source={GetPath(relativePath)};Mode=ReadOnly");
+            return GetConnection(exactPath, "ReadOnly");
+        }
+
+        private static SqliteConnection GetConnection(string exactPath, string mode)
+        {
+            var connection = new SqliteConnection($"Data Source={exactPath}{(mode != "" ? $";Mode={mode}" : "")}");
             connection.Open();
             connection.CreateFunction(
             "idmatch",
             (string id1, string id2)
-                => id1 == id2 || Normalize(id1) == Normalize(id2));
+                => IDMatch(id1,id2));
 
             return connection;
+        }
+
+        private static bool IDMatch(string id1, string id2)
+        {
+            try
+            {
+                return id1 != null && id2 != null && (id1 == id2 || Normalize(id1) == Normalize(id2));
+            } catch (PhoneNumbers.NumberParseException)
+            {
+                return false;
+            }
         }
 
         private static string Normalize(string id)
@@ -85,23 +100,64 @@ namespace iMessageManager
             }
         }
 
+        public static bool LoadPreload()
+        {
+            if (backupPath == null)
+            {
+                backupPath = Properties.Settings.Default.backupPath;
+            }
+            connection = GetConnection(preloadPath, "");
+            using (SqliteCommand attachCommand = connection.CreateCommand())
+            {
+                attachCommand.CommandText =
+                    $@"
+                            ATTACH DATABASE '{GetPath("Library/SMS/sms.db")}' AS sms;
+                            ATTACH DATABASE '{GetPath("Library/AddressBook/AddressBook.sqlitedb")}' AS addressBook;
+                            ATTACH DATABASE '{GetPath("Library/AddressBook/AddressBookImages.sqlitedb")}' AS addressBookImages;
+                        ";
+
+                attachCommand.ExecuteNonQuery();
+            }
+            return true;
+        }
+
         public static bool LoadBackup(string path)
         {
+            InfoBox popup = InfoBox.Show("Loading messages from backup...");
             backupPath = path;
             try
             {
-                using (var manifestConnection = new SqliteConnection($"Data Source={Path.Combine(path, "manifest.db")};Mode=ReadOnly"))
-                {
-                    manifestConnection.Open();
+                LoadPreload();
 
-                    messagesConnection = GetConnection("Library/SMS/sms.db");
-                    contactsConnection = GetConnection("Library/AddressBook/AddressBook.sqlitedb");
-                    contactsImagesConnection = GetConnection("Library/AddressBook/AddressBookImages.sqlitedb");
-                    return true;
+                using (SqliteCommand setupCommands = connection.CreateCommand())
+                {
+                    setupCommands.CommandText =
+                        $@"
+                            DROP TABLE IF EXISTS handle_contact_join; 
+                            DROP TABLE IF EXISTS messages_master; 
+                            CREATE TABLE handle_contact_join AS SELECT H.ROWID AS handle_id, P.first, P.last, I.data AS image_data
+								FROM handle H
+                                JOIN addressBook.ABMultiValue MV
+                                    ON (MV.property = 3 OR MV.property = 4) AND idmatch(H.id, MV.value)
+                                JOIN addressBook.ABPerson P
+                                    ON MV.record_id = P.ROWID
+                                LEFT OUTER JOIN addressBookImages.ABThumbnailImage I
+                                    ON I.record_id = MV.record_id
+								WHERE I.format = 5;
+                            CREATE TABLE messages_master AS select M.ROWID AS message_id, M.text, M.handle_id, M.date, M.is_from_me, M.associated_message_guid, M.associated_message_type, CMJ.chat_id, M.message_guid
+                                FROM sms.message M
+								JOIN sms.chat_message_join CMJ
+									ON CMJ.message_id = M.ROWID;
+                        ";
+
+                    setupCommands.ExecuteNonQuery();
                 }
+                popup.Close();
+                return true;
             }
-            catch (Exception e)
+            catch (SqliteException e)
             {
+                popup.Close();
                 MessageBox.Show(e.Message);
                 return false;
             }
@@ -109,7 +165,7 @@ namespace iMessageManager
 
         public static bool IsDatabaseLoaded()
         {
-            return messagesConnection != null;
+            return connection != null;
         }
     }
 }

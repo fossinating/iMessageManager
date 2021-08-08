@@ -42,7 +42,7 @@
         <ScrollViewer x:Name="messagesViewer" Grid.Column="1">
             <ScrollViewer.Resources>
                 <DataTemplate x:Key="NameDataStyle">
-                    <imessagemanager:MessageViewer MessageID="{Binding MessageID}"></imessagemanager:MessageViewer>
+                    <imessagemanager:MessageViewer Text="{Binding Text}" Contact="{Binding Contact}" Date="{Binding Date}" FromMe="{Binding FromMe}"></imessagemanager:MessageViewer>
                 </DataTemplate>
             </ScrollViewer.Resources>
             <VirtualizingStackPanel x:Name="messagesStackPanel">

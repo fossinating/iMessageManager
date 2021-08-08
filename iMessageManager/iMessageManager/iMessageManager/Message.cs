@@ -7,7 +7,7 @@ using System.Windows;
 
 namespace iMessageManager
 {
-    class Message
+    public class Message
     {
         public int MessageID { get; private set; }
         public string Text { get; private set; }

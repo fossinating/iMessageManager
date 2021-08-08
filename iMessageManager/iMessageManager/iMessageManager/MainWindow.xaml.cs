@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -37,7 +38,14 @@ namespace iMessageManager
             } else
             {
                 contentControl.Content = startPage;
-                MessageManager.LoadBackup(Properties.Settings.Default.backupPath);
+
+                if (!File.Exists(MessageManager.preloadPath))
+                {
+                    MessageManager.LoadBackup(Properties.Settings.Default.backupPath);
+                } else 
+                {
+                    MessageManager.LoadPreload();
+                }
             }
         }
 
