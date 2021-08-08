@@ -60,7 +60,6 @@ namespace iMessageManager.Pages
         {
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            int targetIndex = -1;
             using (var chatIDCommand = MessageManager.connection.CreateCommand())
             {
                 chatIDCommand.CommandText =
@@ -77,85 +76,13 @@ namespace iMessageManager.Pages
 
                     int chatID = chatIDReader.GetInt32(0);
 
-                    using (var msgCommand = MessageManager.connection.CreateCommand())
-                    {
-                        msgCommand.CommandText =
-                        $@"
-                            SELECT *
-                            FROM messages_master
-                            WHERE chat_id == '{chatID}'
-                            ORDER BY date ASC
-                        ";
-                        using (var msgReader = msgCommand.ExecuteReader())
-                        {
-                            while (msgReader.Read())
-                            {
-
-                                Contact contact;
-                                // if is from me, then no contact needed
-                                if (msgReader.GetInt32(msgReader.GetOrdinal("is_from_me")) == 1)
-                                {
-                                    contact = null;
-                                }
-                                // otherwise, get id from handle
-                                else
-                                {
-
-                                    int handle_id = msgReader.GetInt32(msgReader.GetOrdinal("handle_id"));
-
-                                    if (handle_id == 0)
-                                    {
-                                        if (!msgReader.IsDBNull(msgReader.GetOrdinal("text")))
-                                        {
-                                            MessageBox.Show($"Found a message (id {msgReader.GetInt32(msgReader.GetOrdinal("message_id"))}) with handle 0 not listed as from me but it has message body \"{msgReader.GetString(1)}\"");
-                                        }
-                                        else
-                                        {
-                                            continue;
-                                        }
-                                    }
-
-                                    contact = ContactsManager.FromHandle(handle_id);
-
-                                }
-
-                                bool valid = true;
-                                for (int i = 0; i <= 5; i++)
-                                {
-                                    if (msgReader.IsDBNull(i))
-                                    {
-                                        //MessageBox.Show($"Found null value at index {i} of messageID {_messageID}");
-                                        valid = false;
-                                        break;
-                                    }
-                                }
-                                if (valid)
-                                {
-                                    Message message = new Message(
-                                        msgReader.GetInt32(msgReader.GetOrdinal("handle_id")),
-                                        msgReader.GetString(msgReader.GetOrdinal("text")),
-                                        contact,
-                                        msgReader.GetInt64(msgReader.GetOrdinal("date")),
-                                        msgReader.GetInt32(msgReader.GetOrdinal("is_from_me")) == 1,
-                                        msgReader.GetGuid(msgReader.GetOrdinal("message_guid")));
-
-                                    if (messageID == msgReader.GetInt32(0))
-                                    {
-                                        targetIndex = messages.Count;
-                                    }
-
-                                    messages.Add(message);
-                                }
-                            }
-                        }
-                    }
-
-                    messagesListBox.ItemsSource = messages;
+                    int targetIndex;
+                    messagesListBox.ItemsSource = MessageManager.GetMessagesWhere($"chat_id = '{chatID}'", messageID, out targetIndex);
                     messagesListBox.Items.Refresh();
                     messagesListBox.SelectedIndex = targetIndex;
                     messagesListBox.ScrollIntoView(messagesListBox.SelectedItem);
                     sw.Stop();
-                    MessageBox.Show($"Loaded {messages.Count} messages in {sw.Elapsed}, an average of {sw.ElapsedMilliseconds/messages.Count}ms per message");
+                    MessageBox.Show($"Loaded {messages.Count} messages in {sw.Elapsed}, an average of {((double)sw.ElapsedMilliseconds)/messages.Count}ms per message");
                 }
             }
         }

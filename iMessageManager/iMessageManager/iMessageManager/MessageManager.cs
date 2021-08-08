@@ -144,7 +144,7 @@ namespace iMessageManager
                                 LEFT OUTER JOIN addressBookImages.ABThumbnailImage I
                                     ON I.record_id = MV.record_id
 								WHERE I.format = 5;
-                            CREATE TABLE messages_master AS select M.ROWID AS message_id, M.text, M.handle_id, M.date, M.is_from_me, M.associated_message_guid, M.associated_message_type, CMJ.chat_id, M.message_guid
+                            CREATE TABLE messages_master AS select M.ROWID AS message_id, M.text, M.handle_id, M.date, M.is_from_me, M.associated_message_guid, M.associated_message_type, CMJ.chat_id, M.guid
                                 FROM sms.message M
 								JOIN sms.chat_message_join CMJ
 									ON CMJ.message_id = M.ROWID;
@@ -166,6 +166,92 @@ namespace iMessageManager
         public static bool IsDatabaseLoaded()
         {
             return connection != null;
+        }
+
+        public static List<Message> GetMessagesWhere(string conditional)
+        {
+            return GetMessagesWhere(conditional, -1, out _);
+        }
+
+        public static List<Message> GetMessagesWhere(string conditional, int targetID, out int targetIndex)
+        {
+            targetIndex = -1;
+            List<Message> messages = new List<Message>();
+            using (var msgCommand = MessageManager.connection.CreateCommand())
+            {
+                msgCommand.CommandText =
+                $@"
+                            SELECT *
+                            FROM messages_master
+                            WHERE {conditional}
+                            ORDER BY date ASC
+                        ";
+                using (var msgReader = msgCommand.ExecuteReader())
+                {
+                    while (msgReader.Read())
+                    {
+
+                        Contact contact;
+                        // if is from me, then no contact needed
+                        if (msgReader.GetInt32(msgReader.GetOrdinal("is_from_me")) == 1)
+                        {
+                            contact = null;
+                        }
+                        // otherwise, get id from handle
+                        else
+                        {
+
+                            int handle_id = msgReader.GetInt32(msgReader.GetOrdinal("handle_id"));
+
+                            if (handle_id == 0)
+                            {
+                                if (!msgReader.IsDBNull(msgReader.GetOrdinal("text")))
+                                {
+                                    MessageBox.Show($"Found a message (id {msgReader.GetInt32(msgReader.GetOrdinal("message_id"))}) with handle 0 not listed as from me but it has message body \"{msgReader.GetString(1)}\"");
+                                }
+                                else
+                                {
+                                    continue;
+                                }
+                            }
+
+                            contact = ContactsManager.FromHandle(handle_id);
+
+                        }
+
+                        bool valid = true;
+                        string[] requiredNonNull = new string[] { "handle_id", "text", "date", "is_from_me", "guid", "message_id"};
+                        foreach (string nonNull in requiredNonNull)
+                        {
+                            if (msgReader.IsDBNull(msgReader.GetOrdinal(nonNull)))
+                            {
+                                //MessageBox.Show($"Found null value at index {i} of messageID {_messageID}");
+                                valid = false;
+                                break;
+                            }
+                        }
+                        if (valid)
+                        {
+                            Message message = new Message(
+                                msgReader.GetInt32(msgReader.GetOrdinal("message_id")),
+                                msgReader.GetString(msgReader.GetOrdinal("text")),
+                                contact,
+                                msgReader.GetInt64(msgReader.GetOrdinal("date")),
+                                msgReader.GetInt32(msgReader.GetOrdinal("is_from_me")) == 1,
+                                msgReader.GetGuid(msgReader.GetOrdinal("guid")));
+
+                            if (targetID == msgReader.GetInt32(0))
+                            {
+                                targetIndex = messages.Count;
+                            }
+
+                            messages.Add(message);
+                        }
+                    }
+                }
+            }
+
+            return messages;
         }
     }
 }

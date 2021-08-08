@@ -39,16 +39,20 @@
                 <StackPanel x:Name="conversationPanel"></StackPanel>
             </ScrollViewer>
         </Grid>
-        <ScrollViewer x:Name="messagesViewer" Grid.Column="1">
-            <ScrollViewer.Resources>
+        <Grid Grid.Column="1">
+            <Grid.Resources>
                 <DataTemplate x:Key="NameDataStyle">
                     <imessagemanager:MessageViewer Text="{Binding Text}" Contact="{Binding Contact}" Date="{Binding Date}" FromMe="{Binding FromMe}"></imessagemanager:MessageViewer>
                 </DataTemplate>
-            </ScrollViewer.Resources>
+            </Grid.Resources>
+            <ListBox x:Name="messagesListBox" VirtualizingStackPanel.IsVirtualizing="True"
+                       ItemTemplate="{DynamicResource NameDataStyle}" HorizontalContentAlignment="Stretch"/>
+        </Grid>
+        <!--
+        <ScrollViewer x:Name="messagesViewer" Grid.Column="1">
+            
             <VirtualizingStackPanel x:Name="messagesStackPanel">
-                <ListBox x:Name="messagesListBox" VirtualizingStackPanel.IsVirtualizing="True"
-                       ItemTemplate="{DynamicResource NameDataStyle}"/>
             </VirtualizingStackPanel>
-        </ScrollViewer>
+        </ScrollViewer>-->
     </Grid>
 </UserControl>
