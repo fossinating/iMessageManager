@@ -12,14 +12,16 @@ namespace iMessageManager
         public int MessageID { get; private set; }
         public string Text { get; private set; }
         public Contact Contact { get; private set; }
+        public Conversation Conversation { get; private set; }
         public long Date { get; private set; }
         public bool FromMe { get; private set; }
         public Guid Guid { get; private set; }
 
-        public Message(int messageID, string text, Contact contact, long date, bool fromMe, Guid guid) {
+        public Message(int messageID, string text, Contact contact, Conversation conversation, long date, bool fromMe, Guid guid) {
             this.MessageID = messageID;
             this.Text = text;
             this.Contact = contact;
+            this.Conversation = conversation;
             this.Date = date;
             this.FromMe = fromMe;
             this.Guid = guid;

@@ -41,18 +41,18 @@
             <Grid Grid.Row="3">
                 <Grid.Resources>
                     <DataTemplate x:Key="MessagePreviewTemplate">
-                        <imessagemanager:MessagePreview Text="{Binding Text}" Contact="{Binding Contact}" Date="{Binding Date}" FromMe="{Binding FromMe}"></imessagemanager:MessagePreview>
+                        <imessagemanager:MessagePreview MessageID="{Binding MessageID}"></imessagemanager:MessagePreview>
                     </DataTemplate>
                 </Grid.Resources>
-                <ListBox x:Name="messagesListBox" VirtualizingStackPanel.IsVirtualizing="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                       ItemTemplate="{DynamicResource MessagePreviewTemplate}" HorizontalContentAlignment="Stretch" VirtualizingPanel.ScrollUnit="Pixel">
+                <ListBox x:Name="conversationsListBox" VirtualizingStackPanel.IsVirtualizing="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                       ItemTemplate="{DynamicResource MessagePreviewTemplate}" HorizontalContentAlignment="Stretch" VirtualizingPanel.ScrollUnit="Pixel" SelectionChanged="conversationsListBox_SelectionChanged">
                 </ListBox>
             </Grid>
         </Grid>
         <Grid Grid.Column="1">
             <Grid.Resources>
                 <DataTemplate x:Key="MessageViewerTemplate">
-                    <imessagemanager:MessageViewer Text="{Binding Text}" Contact="{Binding Contact}" Date="{Binding Date}" FromMe="{Binding FromMe}"></imessagemanager:MessageViewer>
+                    <imessagemanager:MessageViewer MessageID="{Binding MessageID}"></imessagemanager:MessageViewer>
                 </DataTemplate>
             </Grid.Resources>
             <ListBox x:Name="messagesListBox" VirtualizingStackPanel.IsVirtualizing="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled"

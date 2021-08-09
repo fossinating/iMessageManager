@@ -20,41 +20,18 @@ namespace iMessageManager
     /// </summary>
     public partial class MessageViewer : UserControl
     {
-        public static DependencyProperty TextProperty;
-        public static DependencyProperty ContactProperty;
-        public static DependencyProperty DateProperty;
-        public static DependencyProperty FromMeProperty;
+        public static DependencyProperty MessageIDProperty;
+        private Message messageReference;
 
-        public string Text
+        public int MessageID
         {
-            get { return (string)base.GetValue(TextProperty); }
-            set { base.SetValue(TextProperty, value); }
-        }
-
-        public Contact Contact
-        {
-            get => (Contact)base.GetValue(ContactProperty);
-            set { base.SetValue(ContactProperty, value); }
-        }
-
-        public long Date
-        {
-            get { return (long)base.GetValue(DateProperty); }
-            set { base.SetValue(DateProperty, value); }
-        }
-
-        public bool FromMe
-        {
-            get { return (bool)base.GetValue(FromMeProperty); }
-            set { base.SetValue(FromMeProperty, value); }
+            get => (int)GetValue(MessageIDProperty);
+            set => SetValue(MessageIDProperty, value);
         }
 
         static MessageViewer()
         {
-            TextProperty = DependencyProperty.Register("Text", typeof(string), typeof(MessageViewer));
-            ContactProperty = DependencyProperty.Register("Contact", typeof(Contact), typeof(MessageViewer));
-            DateProperty = DependencyProperty.Register("Date", typeof(long), typeof(MessageViewer));
-            FromMeProperty = DependencyProperty.Register("FromMe", typeof(bool), typeof(MessageViewer));
+            MessageIDProperty = DependencyProperty.Register("MessageID", typeof(int), typeof(MessageViewer));
         }
 
         public MessageViewer() {
@@ -63,9 +40,13 @@ namespace iMessageManager
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            textLabel.Text = Text;
-            timeLabel.Text = Util.cocoaToReadable(Date);
-            if (FromMe)
+            if (messageReference == null)
+            {
+                messageReference = MessageManager.GetMessage(MessageID);
+            }
+            textLabel.Text = messageReference.Text;
+            timeLabel.Text = Util.cocoaToReadable(messageReference.Date);
+            if (messageReference.FromMe)
             {
                 // if is from me
                 SolidColorBrush myBrush = new SolidColorBrush();
@@ -82,10 +63,7 @@ namespace iMessageManager
                 textBackground.Background = myBrush;
                 textLabel.TextAlignment = TextAlignment.Left;
                 textDropShadow.Direction = 225;
-                if (Contact.photo != null && Contact.photo.Length > 0)
-                {
-                    contactImage.Source = Util.ToImage(Contact.photo);
-                }
+                contactImage.Source = messageReference.Contact.getPhoto();
             }
         }
     }

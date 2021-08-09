@@ -5,14 +5,26 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:iMessageManager"
              mc:Ignorable="d" 
-             d:DesignHeight="100" d:DesignWidth="800" MaxHeight="100" MinHeight="100">
+             d:DesignHeight="100" d:DesignWidth="800" MaxHeight="100" MinHeight="100" Loaded="UserControl_Loaded">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"></ColumnDefinition>
             <ColumnDefinition Width="6*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
-        <ToggleButton x:Name="selectButton" Grid.Column="0" Grid.ColumnSpan="2" Checked="selectButton_Checked"></ToggleButton>
-        <Image x:Name="contactImage" Grid.Column="0" Grid.ColumnSpan="1" VerticalAlignment="Center" HorizontalAlignment="Center" Stretch="UniformToFill"/>
+        <Grid x:Name="contactGrid" Grid.Column="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition></RowDefinition>
+                <RowDefinition></RowDefinition>
+            </Grid.RowDefinitions>
+            <Image x:Name="contactImageTL" Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center" Stretch="UniformToFill"/>
+            <Image x:Name="contactImageTR" Grid.Column="1" Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center" Stretch="UniformToFill"/>
+            <Image x:Name="contactImageBL" Grid.Column="0" Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Stretch="UniformToFill"/>
+            <Image x:Name="contactImageBR" Grid.Column="1" Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Stretch="UniformToFill"/>
+        </Grid>
 
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>

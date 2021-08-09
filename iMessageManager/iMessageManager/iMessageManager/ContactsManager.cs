@@ -117,18 +117,56 @@ namespace iMessageManager
             using (var command = MessageManager.connection.CreateCommand())
             {
                 command.CommandText =
-                    $@"SELECT id FROM handle
-                    WHERE ROWID = '{handleID}'";
+                    $@"
+                        SELECT *
+                        FROM handle_contact_join
+                        WHERE handle_id = '{handleID}'";
 
                 using (var reader = command.ExecuteReader())
                 {
                     if (reader.Read())
                     {
-                        return GetContact(reader.GetString(0));
+                        Contact contact = new Contact(
+                            !reader.IsDBNull(reader.GetOrdinal("first")) ? reader.GetString(reader.GetOrdinal("first")) : "",
+                            !reader.IsDBNull(reader.GetOrdinal("last")) ? reader.GetString(reader.GetOrdinal("last")) : ""
+                            );
+                        if (!reader.IsDBNull(reader.GetOrdinal("image_data")))
+                        {
+                            byte[] h = null;
+                            using (MemoryStream mm = new MemoryStream())
+                            {
+                                using (var rs = reader.GetStream(reader.GetOrdinal("image_data")))
+                                {
+                                    rs.CopyTo(mm);
+                                }
+                                h = mm.ToArray();
+                            }
+                            contact.photo = h;
+                        }
+                        return contact;
                     }
                     else
                     {
-                        return null;
+                        using (var hCommand = MessageManager.connection.CreateCommand())
+                        {
+                            hCommand.CommandText = $@"
+                                                        SELECT id
+                                                        FROM sms.handle
+                                                        WHERE ROWID = {handleID};
+                                                    ";
+
+                            using (var hReader = hCommand.ExecuteReader())
+                            {
+                                if (hReader.Read())
+                                {
+                                    return new Contact(hReader.GetString(hReader.GetOrdinal("id")));
+                                }
+                                else
+                                {
+                                    return null;
+                                }
+                            }
+                        }
                     }
                 }
             }

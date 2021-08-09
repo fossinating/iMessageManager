@@ -8,9 +8,9 @@ namespace iMessageManager
 {
     class MessageShell
     {
-        public string MessageID { get; private set; }
+        public int MessageID { get; private set; }
 
-        public MessageShell(string MessageID)
+        public MessageShell(int MessageID)
         {
             this.MessageID = MessageID;
         }

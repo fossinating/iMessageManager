@@ -1,4 +1,5 @@
-﻿using System;
+﻿using iMessageManager.Pages;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,39 +21,83 @@ namespace iMessageManager
     /// </summary>
     public partial class MessagePreview : UserControl
     {
-        private Pages.SearchPage searchPage;
-        public int messageID
+        public static DependencyProperty MessageIDProperty;
+        private Message messageReference;
+
+        public int MessageID
         {
-            get; private set;
+            get => (int)GetValue(MessageIDProperty);
+            set => SetValue(MessageIDProperty, value);
         }
 
-        public MessagePreview(int messageID, string name, string content, string time, byte[] imageData, Pages.SearchPage searchPage)
+        static MessagePreview()
+        {
+            MessageIDProperty = DependencyProperty.Register("MessageID", typeof(int), typeof(MessagePreview));
+        }
+
+        public MessagePreview()
         {
             InitializeComponent();
-            this.searchPage = searchPage;
-            this.messageID = messageID;
+        }
 
-            conversationNameLabel.Content = name;
-            messageLabel.Content = content;
-            timeLabel.Content = time;
-
-            if (imageData != null && imageData.Length > 0)
+        private void UserControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (messageReference == null)
             {
-                contactImage.Source = Util.ToImage(imageData);
+                messageReference = MessageManager.GetMessage(MessageID);
+            }
+            conversationNameLabel.Content = messageReference.Conversation.Name;
+            messageLabel.Content = messageReference.Text;
+            timeLabel.Content = Util.cocoaToReadable(messageReference.Date);
+
+            if (messageReference.Conversation.Members.Count > 1)
+            {
+                List<string> usedNames = new();
+
+                tryUseContact(messageReference.Contact, ref usedNames);
+                tryUseContact(messageReference.Contact, ref usedNames, true);
+
+                foreach (Contact contact in messageReference.Conversation.Members)
+                {
+                    if (usedNames.Count >= 4)
+                    {
+                        break;
+                    }
+                    tryUseContact(contact, ref usedNames);
+                }
+                foreach (Contact contact in messageReference.Conversation.Members)
+                {
+                    if (usedNames.Count >= 4)
+                    {
+                        break;
+                    }
+                    tryUseContact(contact, ref usedNames, true);
+                }
+            } else
+            {
+                if (messageReference.Conversation.Members[0] != null)
+                {
+                    contactGrid.ColumnDefinitions.Clear();
+                    contactGrid.RowDefinitions.Clear();
+                    contactImageTL.Source = messageReference.Conversation.Members[0].getPhoto();
+                }
             }
         }
 
-        private void selectButton_Checked(object sender, RoutedEventArgs e)
+        private void tryUseContact(Contact contact, ref List<string> usedNames)
         {
-            if ((bool)selectButton.IsChecked)
-            {
-                searchPage.select(this);
-            }
+            tryUseContact(contact, ref usedNames, false);
         }
 
-        public void setSelected(bool selected)
+        private void tryUseContact(Contact contact, ref List<string> usedNames, bool useName)
         {
-            selectButton.IsChecked = selected;
+            Image[] images = new Image[] { contactImageTL, contactImageBR, contactImageTR, contactImageBL };
+            
+            if (contact != null && !usedNames.Contains(contact.displayName) && ((contact.photo != null && contact.photo.Length > 0) || useName))
+            {
+                images[usedNames.Count].Source = contact.getPhoto();
+                usedNames.Add(contact.displayName);
+            }
         }
     }
 }
