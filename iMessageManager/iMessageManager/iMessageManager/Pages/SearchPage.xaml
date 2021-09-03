@@ -14,31 +14,10 @@
         <Grid Grid.Column="0">
             <Grid.RowDefinitions>
                 <RowDefinition Height ="1*"></RowDefinition>
-                <RowDefinition Height ="1*"></RowDefinition>
-                <RowDefinition Height ="1*"></RowDefinition>
                 <RowDefinition Height ="8*"></RowDefinition>
             </Grid.RowDefinitions>
-            <Grid Grid.Row="0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1*"></ColumnDefinition>
-                    <ColumnDefinition Width="2*"></ColumnDefinition>
-                </Grid.ColumnDefinitions>
-                <Label x:Name="nameSearchLabel" Grid.Column="0" Content="Name:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
-                <TextBox x:Name="nameTextBox" Grid.Column="1"></TextBox>
-            </Grid>
+            <Button x:Name="searchButton" Grid.Column="0" Grid.Row="0" Content="Search" Click="searchButton_Click"></Button>
             <Grid Grid.Row="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1*"></ColumnDefinition>
-                    <ColumnDefinition Width="2*"></ColumnDefinition>
-                </Grid.ColumnDefinitions>
-                <Label x:Name="contentSearchLabel" Grid.Column="0" Content="Contains:" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
-                <TextBox x:Name="containsTextBox" Grid.Column="1"></TextBox>
-            </Grid>
-            <Button x:Name="searchButton" Grid.Column="0" Grid.Row="2" Content="Search" Click="searchButton_Click"></Button>
-            <ScrollViewer x:Name="conversationViewer" Grid.Row="3">
-                <StackPanel x:Name="conversationPanel"></StackPanel>
-            </ScrollViewer>
-            <Grid Grid.Row="3">
                 <Grid.Resources>
                     <DataTemplate x:Key="MessagePreviewTemplate">
                         <imessagemanager:MessagePreview MessageID="{Binding MessageID}"></imessagemanager:MessagePreview>
